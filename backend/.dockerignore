@@ -1,0 +1,14 @@
+**
+!requirements.lock
+!pyproject.toml
+!alembic.ini
+!app/
+!app/**
+!migrations/
+!migrations/**
+**/__pycache__/**
+**/*.pyc
+**/*.db*
+**/*.sqlite*
+**/*.salt
+**/.env*

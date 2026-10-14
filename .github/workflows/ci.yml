@@ -1,0 +1,52 @@
+name: CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+      - run: python scripts/tasks.py setup
+      - run: backend/.venv/bin/python -m playwright install --with-deps chromium
+      - run: python scripts/tasks.py check
+      - run: python scripts/tasks.py e2e
+      - run: python scripts/tasks.py audit
+      - run: python scripts/tasks.py fresh-install
+  compose-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose config --quiet
+      - run: docker compose up --build --detach --wait --wait-timeout 180
+      - run: docker compose exec -T backend python -m alembic check
+      - run: docker compose exec -T backend python -m app.health.doctor
+      - name: Verify typed endpoint through the frontend proxy and SPA routing
+        run: |
+          python - <<'PY'
+          import json
+          import urllib.request
+          response = urllib.request.urlopen('http://127.0.0.1:5173/api/health')
+          payload = json.load(response)
+          assert payload['status'] == 'ok'
+          assert payload['database'] == 'ready'
+          assert response.headers['Cache-Control'] == 'no-store'
+          assert response.headers['X-Content-Type-Options'] == 'nosniff'
+          for route in ['/privacy', '/history', '/applications', '/generate']:
+              response = urllib.request.urlopen('http://127.0.0.1:5173' + route)
+              assert "default-src 'self'" in response.headers['Content-Security-Policy']
+              assert b'<div id="root"></div>' in response.read()
+          PY
+      - if: always()
+        run: docker compose logs --no-color
+      - if: always()
+        run: docker compose down --volumes
