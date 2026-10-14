@@ -10,7 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
   "fastapi>=0.115,<1", "uvicorn>=0.34,<1", "pydantic-settings>=2.7,<3",
   "SQLAlchemy>=2.0,<2.1", "alembic>=1.14,<2", "psycopg[binary]>=3.2,<4",
-  "playwright==1.63.0", "pypdf==6.19.0",
+  "playwright==1.63.0", "pypdf==6.20.0",
   "httpx==0.28.1", "cryptography==50.0.0", "sqlcipher3-wheels==0.5.7",
 ]
 
