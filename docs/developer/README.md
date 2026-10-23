@@ -6,6 +6,7 @@ Source review: 2026-10-15. This handbook explains the implemented Phase 0-6 appl
 
 1. Read this overview for the product vocabulary, runtime boundaries and cross-stack workflows.
 2. Read [Backend implementation](BACKEND.md), following the linked source files while reading.
+   Use the [backend concepts reading list](BACKEND_READING_LIST.md) for prerequisite topics and learning goals organized by the same section numbers.
 3. Read [Frontend implementation](FRONTEND.md), especially state ownership, API calls and editing races.
 4. Read [the security audit](../release/security-audit-2026-10-09.md) before changing privacy, streaming, parsing, rendering or deployment.
 5. Use [the new-project architecture template](PROJECT_ARCHITECTURE_TEMPLATE.md) with the existing [coding-practice guides](../coding-practices/README.md) when starting another project.

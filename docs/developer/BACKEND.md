@@ -2,6 +2,8 @@
 
 Source review: 2026-10-15. Read [the handbook overview](README.md) first. Paths and examples below describe current source unless explicitly labeled as a future-project recommendation. Repository rules take precedence over illustrative examples.
 
+For prerequisite topics, search terms and learning goals matched to every section below, use the [backend concepts reading list](BACKEND_READING_LIST.md).
+
 ## Contents
 
 1. [Architecture and dependency direction](#1-architecture-and-dependency-direction)

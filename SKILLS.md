@@ -210,3 +210,8 @@ User reported missing old template on 5173. Read-only counts found native SQLite
 ## Experience editor visibility — 2026-10-16
 
 Inspected the actual native resume editor in the in-app browser. The structured editor is present but collapsed behind Add experience. Opened that form and verified Company, Title, Start date, End date, Present, summary and duty controls in the live accessibility tree; screenshot confirms the visible date inputs. No code, resume/library data or settings changed; master remained at version 80. Product tests not rerun for UI navigation. All six ending documents maintained; original blueprint and ending rules preserved.
+
+
+## Backend learning companion — 2026-10-22
+
+Use docs/developer/BACKEND_READING_LIST.md when learning or explaining BACKEND.md. The list preserves sections 1-14 and offers a dependency-aware study order. No new skill/plugin or external research was needed; this is a local documentation companion.
