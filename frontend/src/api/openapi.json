@@ -2637,6 +2637,11 @@
       "Item": {
         "additionalProperties": false,
         "properties": {
+          "experience_summary": {
+            "default": false,
+            "title": "Experience Summary",
+            "type": "boolean"
+          },
           "facts": {
             "anyOf": [
               {

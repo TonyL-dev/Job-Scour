@@ -169,7 +169,8 @@ def main() -> None:
                             page.get_by_role("button", name="synthetic.docx · committed")
                         ).to_be_visible()
                         page.screenshot(
-                            path=str(evidence / "phase6-import-browser.png"), full_page=True
+                            path=str(evidence / "phase6-import-browser.png"),
+                            full_page=True,
                         )
                         # A: configuration/privacy and a manually entered career record.
                         page.goto(url)
@@ -319,7 +320,8 @@ def main() -> None:
                             ).click()
                         downloaded_letter.value.save_as(str(evidence / "phase6-letter.docx"))
                         page.screenshot(
-                            path=str(evidence / "phase6-letter-browser.png"), full_page=True
+                            path=str(evidence / "phase6-letter-browser.png"),
+                            full_page=True,
                         )
                         # Phase 6D: synthetic comparison and explicit activation/rollback.
                         page.goto(url + "/prompts")
@@ -353,7 +355,8 @@ def main() -> None:
                             page.get_by_text("Immutable template revision saved.", exact=True)
                         ).to_be_visible()
                         page.screenshot(
-                            path=str(evidence / "phase6-template-browser.png"), full_page=True
+                            path=str(evidence / "phase6-template-browser.png"),
+                            full_page=True,
                         )
                         page.goto(url + "/history")
                         page.get_by_label("Resume history document", exact=True).select_option(
@@ -364,6 +367,78 @@ def main() -> None:
                                 "button", name="Download selected version DOCX"
                             ).click()
                         downloaded_resume.value.save_as(str(evidence / "phase6-resume.docx"))
+                        # Structured master experience: real source save, PDF.js and reload.
+                        page.goto(url + "/resumes")
+                        page.get_by_label("Resume title", exact=True).fill(
+                            "Structured experience master"
+                        )
+                        page.get_by_label("Full name *", exact=True).fill(
+                            "Synthetic Experience Candidate"
+                        )
+                        page.get_by_label("New section", exact=True).select_option("experience")
+                        page.get_by_role("button", name="Add section", exact=True).click()
+                        page.get_by_role("button", name="Add experience", exact=True).click()
+                        form = page.get_by_role("form", name="Add experience", exact=True)
+                        form.get_by_label("Company *", exact=True).fill("Structured Company")
+                        form.get_by_label("Title *", exact=True).fill("Systems Engineer")
+                        form.get_by_label("Start date *", exact=True).fill("2021-01-01")
+                        form.get_by_label("Present", exact=True).check()
+                        form.get_by_label("Summary (one sentence max)", exact=True).fill(
+                            "Built reliable systems."
+                        )
+                        form.get_by_label("Duty 1", exact=True).fill("Maintained APIs")
+                        form.get_by_role("button", name="Add duty", exact=True).click()
+                        form.get_by_label("Duty 2", exact=True).fill("Reviewed changes")
+                        form.get_by_role(
+                            "button", name="Add experience to draft", exact=True
+                        ).click()
+                        expect(
+                            page.get_by_text(
+                                "Experience saved to the career library and added to this draft.",
+                                exact=True,
+                            )
+                        ).to_be_visible()
+                        page.get_by_role("button", name="Save master", exact=True).click()
+                        expect(page.get_by_text("Saved · version 1", exact=True)).to_be_visible()
+                        expect(page.locator(".pdf-pages canvas").first).to_be_visible()
+                        page.get_by_label("Preview format", exact=True).select_option("html")
+                        frame = page.frame_locator('iframe[title="Resume HTML preview"]')
+                        expect(
+                            frame.locator("p.text", has_text="Built reliable systems.")
+                        ).to_be_visible()
+                        expect(frame.locator("p.bullet")).to_have_count(2)
+                        page.get_by_role(
+                            "button",
+                            name="Edit details: Systems Engineer · Structured Company",
+                            exact=True,
+                        ).click()
+                        edit = page.get_by_role("form", name="Edit experience details", exact=True)
+                        edit.get_by_label("Present", exact=True).uncheck()
+                        edit.get_by_label("End date", exact=True).fill("2025-12-31")
+                        edit.get_by_role(
+                            "button", name="Save experience details", exact=True
+                        ).click()
+                        expect(page.get_by_text("Saved · version 2", exact=True)).to_be_visible(
+                            timeout=15000
+                        )
+                        expect(frame.locator("p.facts")).to_contain_text("2025-12-31")
+                        page.reload()
+                        page.get_by_label("Saved resumes", exact=True).select_option(
+                            label="Structured experience master"
+                        )
+                        expect(
+                            page.get_by_role(
+                                "textbox", name="Summary (one sentence max)", exact=True
+                            )
+                        ).to_have_value("Built reliable systems.", timeout=15000)
+                        expect(
+                            page.get_by_role("textbox", name="Duty (bullet point)", exact=True)
+                        ).to_have_count(2)
+                        expect(page.locator(".pdf-pages canvas").first).to_be_visible()
+                        page.screenshot(
+                            path=str(evidence / "structured-experience-browser.png"),
+                            full_page=True,
+                        )
                         # Privacy: actual cookies, unlock, JSON/PDF archive and delete-all.
                         page.get_by_role("link", name="Privacy", exact=True).click()
                         expect(
@@ -426,6 +501,7 @@ def main() -> None:
                                         "6D",
                                         "6E",
                                         "6F",
+                                        "structured-experience",
                                     ],
                                     "model_responses": "synthetic mocks",
                                     "database": "SQLCipher",
@@ -437,6 +513,17 @@ def main() -> None:
                             encoding="utf-8",
                         )
                     except BaseException:
+                        (evidence / "browser-failure-diagnostics.json").write_text(
+                            json.dumps(
+                                {
+                                    "errors": errors,
+                                    "external": external,
+                                    "service_exit_codes": [service.poll() for service in services],
+                                },
+                                indent=2,
+                            ),
+                            encoding="utf-8",
+                        )
                         page.screenshot(
                             path=str(evidence / "phase4-browser-failure.png"),
                             full_page=True,

@@ -2484,6 +2484,11 @@ export interface components {
         };
         /** Item */
         Item: {
+            /**
+             * Experience Summary
+             * @default false
+             */
+            experience_summary: boolean;
             facts?: components["schemas"]["DisplayFacts"] | null;
             /**
              * Key

@@ -78,7 +78,7 @@ This stores a reusable key in your Windows user environment without printing it.
 ## 6. First product workflow
 
 1. Import a text PDF/DOCX locally, review candidates and parent links, then commit approved facts; or enter them in Career library.
-2. Build and save a master using library sources. Inspect the actual PDF; optionally choose the gold-standard master.
+2. Build and save a master using library sources. In an experience section, **Add experience** collects company/title/start/end-or-present, an optional one-sentence summary and individual duty bullets. It saves the library source before adding draft items; save the master separately. **Edit details: …** updates shared company/title/dates while old resume versions retain their facts. Inspect the actual PDF; optionally choose the gold-standard master. See README for summary limits and library-versus-resume text edits.
 3. Save a job description in Job analysis; analyze it after AI setup.
 4. Generate & review a tailored resume. Review sources/rejections, save a separate version, and inspect/download PDF or DOCX from history.
 5. Generate/review a cover letter from the saved analysis and selected evidence; save an immutable version.
@@ -129,3 +129,8 @@ pnpm --dir frontend dev --port 5180
 ```
 
 Do not run duplicate instances while the current services are listening. Current process information is in .validation/application-running.json; runtime browser evidence is in .validation/application-smoke-evidence.json. This startup verification did not rerun the complete development test suite; its previous acceptance results remain recorded separately.
+
+
+## Current saved-work launch — 2026-10-16
+
+The native SQLite workspace now uses **http://127.0.0.1:5173**, with backend on **8000**. This supersedes the historical 5180/8010 launch record above. Docker frontend/backend were stopped without deleting volumes; PostgreSQL/Redis remain preserved. Follow the **Reopen your saved workspace on Windows** commands in [README](../README.md#reopen-your-saved-workspace-on-windows), including its explicit existing database path. Do not run `docker compose up` to reopen the native store: it starts a separate PostgreSQL workspace. Select the master in Saved resumes or bookmark its direct editor URL.

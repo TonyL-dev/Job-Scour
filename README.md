@@ -2,6 +2,10 @@
 
 A local-first career and resume workspace with sourced generation/review, actual PDF preview/export, ATS guidance, immutable version history, application tracking, passcode protection, optional encrypted storage, and full data controls. Phase 6 adds reviewed imports, profile fact collection, cover letters, prompt preferences/playground, DOCX export and custom templates. Release verification and environment limits are recorded in IMPLEMENTATION_STATUS.md. Codex is the default AI provider and requires explicit sharing consent; manual editing, ATS, history and tracking work without AI.
 
+## Developer onboarding
+
+Start with the [developer handbook](docs/developer/README.md) for the current architecture, repository map, design principles and traced workflows. Read the detailed [backend](docs/developer/BACKEND.md) and [frontend](docs/developer/FRONTEND.md) guides for code organization, contracts, state, transactions, concurrency, privacy, testing and feature-change recipes. The [new-project architecture template](docs/developer/PROJECT_ARCHITECTURE_TEMPLATE.md) works alongside the reusable coding-practice guides to document future projects. The handbook distinguishes implemented code, historical plans, recommended patterns and known limitations.
+
 ## Choose an installation
 
 For reusable standards to copy into future projects, see the [frontend and backend coding practice guides](docs/coding-practices/README.md). They cover architecture, naming, implementation patterns, security, testing and new-project adoption checklists.
@@ -10,7 +14,44 @@ For the complete Windows launch, AI setup, optional private-file key and first-u
 
 Use the native setup below for Codex generation with your existing ChatGPT login. Docker provides a self-contained manual editing/PDF/ATS/history/tracker/privacy installation; the stock image does not include Codex CLI or an account login. Download or copy the complete repository source, including lockfiles and bundled fonts, into a writable directory. Installation downloads dependencies and Chromium; the manual workspace needs no internet after setup. No public repository or downloadable signed installer is currently provided.
 
-## Start with Docker
+## Reopen your saved workspace on Windows
+
+**For this existing installation, use the native app at http://127.0.0.1:5173.** Your saved master resume is in `backend/resume-tailor.db`. Docker uses a separate PostgreSQL database, even when launched from the same project folder; it does not automatically load or copy the native database. Starting Docker on port 5173 can therefore show an empty workspace while your native resume is still saved.
+
+After restarting Windows, open two PowerShell terminals. If Docker is serving this project on port 5173, first run `docker compose stop frontend backend` from the project folder. This frees the app ports and preserves its database volumes. Use the native commands below for your saved SQLite workspace; `docker compose up` starts the separate Docker workspace again. In the first, start the backend against the existing database:
+
+```powershell
+Set-Location 'D:\DUM-E\Stonks V2'
+if (-not (Test-Path -LiteralPath 'backend/resume-tailor.db' -PathType Leaf)) {
+    throw 'Saved database not found. Check the project folder before starting.'
+}
+$env:APP_DATABASE_URL = 'sqlite:///' + (Resolve-Path -LiteralPath 'backend/resume-tailor.db').Path.Replace('\', '/')
+$env:APP_API_HOST = '127.0.0.1'
+$env:APP_API_PORT = '8000'
+$env:APP_FRONTEND_ORIGINS = '["http://127.0.0.1:5173","http://localhost:5173"]'
+if (-not $env:APP_UPLOAD_KEY) {
+    $env:APP_UPLOAD_KEY = [Environment]::GetEnvironmentVariable('APP_UPLOAD_KEY', 'User')
+}
+python scripts/tasks.py backend
+```
+
+In the second terminal, start the frontend with its API pointed at that backend:
+
+```powershell
+Set-Location 'D:\DUM-E\Stonks V2'
+$env:API_PROXY_TARGET = 'http://127.0.0.1:8000'
+pnpm --dir frontend dev --host 127.0.0.1 --port 5173 --strictPort
+```
+
+Keep both terminals open, then open [Master resumes](http://127.0.0.1:5173/resumes) and choose your master from **Saved resumes**. The editor initially opens **New master resume**; blank fields do not mean your saved resume was deleted. Bookmark your selected resume's editor URL to reopen it directly.
+
+These are restart commands for the already installed project; no setup or migration is needed for an ordinary restart. If you move the project, update `Set-Location` in both commands. If either port is already occupied, use the existing native instance or stop it before starting another. See [Run on Windows](docs/run-windows.md) for first-time setup, upgrades and optional storage keys.
+
+Click **Save master** or **Save & download PDF** once when creating a new resume. Autosave applies only after that first save and only while enabled; wait for the saved indicator before closing. Saved resumes and their versions persist in the database when the browser or computer shuts down. Use **Privacy** exports for additional backups, and retain any encryption keys separately.
+
+## Start with Docker (separate workspace)
+
+To reopen the existing native resume, use the Windows restart instructions above. The following starts Docker's own persistent workspace.
 
 Install Docker Desktop with Compose v2, then from the repository root:
 
@@ -24,7 +65,27 @@ Only frontend/backend loopback ports are published. Container services communica
 
 `docker compose down` stops services and preserves database volumes. `docker compose down --volumes` explicitly deletes their data. Root `.env` may set `FRONTEND_PORT` and `BACKEND_PORT`; port changes do not require a frontend rebuild because API requests use the same origin.
 
+### Troubleshoot a backend startup failure
+
+If startup reports `dependency backend failed to start`, inspect the service status and backend logs:
+
+```sh
+docker compose ps -a
+docker compose logs --tail 100 backend
+```
+
+If PostgreSQL is healthy and the logs show `failed to resolve host 'postgres'`, recreate the backend and frontend to refresh their container network connections:
+
+```sh
+docker compose up -d --force-recreate --wait backend frontend
+docker compose ps
+```
+
+This recovered the observed Docker DNS startup failure and preserves the existing database and Redis volumes. Once all four services are healthy, open http://127.0.0.1:5173. If startup still fails or the logs show a different error, inspect the latest backend logs before choosing another fix. Do not use `docker compose down --volumes` for this recovery; it deletes stored data.
+
 ## Start without Docker
+
+This section covers first-time setup with default ports. For the existing Windows workspace, use **Reopen your saved workspace on Windows** above on subsequent launches.
 
 Requires Python 3.12+ and Node.js 24.x. Use 64-bit Python and install pnpm 11.19.0 (for example, `npm install -g pnpm@11.19.0`) and put Python, Node, pnpm, and Git on PATH. Commands work in PowerShell and POSIX shells.
 
@@ -92,6 +153,10 @@ Pre-commit runs the same checks using the local venv and pnpm. Git must be initi
 Open **Career library** and enter your experiences, projects, education, courses, skills, certifications, volunteer work, awards, publications, and other history. Add achievements with metrics under exactly one experience or project. Link each skill to an experience, project, or achievement through **Skill evidence**. Edit records or retire them when no longer relevant. Dependent records become inactive when a parent is retired.
 
 Open **Master resumes**, enter your contact details, and add sections. Use **Add from library** to insert records with source references; employer/title/date display facts are resolved by the backend. You can also enter manual text, which is marked unverified if it has no sources. Move sections and items with the arrow buttons; change titles, visibility, fonts, colors, spacing, and margins. Protection flags prevent AI regeneration from changing protected content; they do not prevent your own manual edits. At most one master is the gold standard.
+
+In an **experience** section, choose **Add experience** to enter **Company**, **Title**, **Start date**, **End date** or **Present**, an optional **Summary (one sentence max)** and **Duties**. Add one duty per field; at least a summary or one duty is needed. The summary is limited to 500 characters on one line; sentence validation is conservative, so avoid periods in abbreviations. Summaries render as paragraphs and each duty as a bullet in PDF/HTML and DOCX. The action saves a career library experience containing the supplied text as evidence and adds sourced items to your draft. Save the master once to persist the document; subsequent edits follow the autosave setting. Cancelling or discarding the resume draft does not delete an already saved library record.
+
+Use **Edit details: …** to change a linked experience's company/title/dates. This explicitly updates the shared library record; save/autosave captures the current facts in a new resume version while old versions retain their original facts. Other saved resumes refresh those facts only when edited/saved. Edit summary/duty text, choose its **Experience text type**, or reorder/remove individual items in the master editor. These text edits affect the resume, not the library evidence; update the career record separately when the underlying facts change. Existing experience items remain duty bullets until you explicitly mark one as a summary. No AI call is needed.
 
 The default preview displays actual PDF pages using bundled PDF.js, with the same Chromium renderer and bundled Noto fonts used for download. The alternate sandboxed HTML preview is continuous and offers accessible text. Page targets produce warnings; generation can fit unlocked content to the target. **Save & download PDF** saves your draft first. Saves append immutable snapshots and reject stale expected versions. Enable autosave after the first save, and use Resume history for compare, restore and duplicate.
 

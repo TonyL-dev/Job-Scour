@@ -1,5 +1,9 @@
 # Skills and maintenance notes
 
+## Structured experience maintenance — 2026-10-15
+
+No specialized skill/plugin was needed for this application change. Use `python scripts/tasks.py api` for the additive resume contract and `check` for lint/types/backend/frontend/drift/build. Run formatting from `backend` so its 100-character configuration applies to scripts/tests. `tests/test_experience_editor.py` covers both real Chromium templates, PDF content, DOCX paragraph/bullet semantics, immutable source-fact history, legacy defaults and synthetic generation acceptance/rejection. `scripts/e2e.py` additionally exercises structured entry, PDF.js/HTML preview, source date edits, autosave and reload in the disposable SQLCipher workspace. Never run this browser validation against personal data or call live models for these deterministic changes. Existing real-model/platform limitations remain; library source save and resume save are distinct operations.
+
 Updated 2026-10-07, Phase 2. No specialized Codex skill was needed for this repository implementation, and no new reusable skill or plugin was installed.
 
 ## Repository workflows
@@ -166,3 +170,43 @@ GitHub commit guidance - 2026-10-13: read-only Git inspection confirms an initia
 
 
 Pre-publication privacy review - 2026-10-13: inspected all 239 Git-eligible source/documentation files with credential/contact/path patterns and reviewed flagged examples without reading the personal database or environment credential contents. No recognized live credential signatures or real contact/resume records were identified; this bounded review is not an exhaustive secret-scan guarantee. Six root session documents contain the Windows username/local executable paths; docs/run-windows.md includes the local project path. The security audit and session history disclose point-in-time privacy settings and unresolved vulnerabilities. Email matches are synthetic examples; Compose includes a documented local development database password. Existing .gitignore excludes the actual backend/resume-tailor.db, .env files and .validation, but does not broadly exclude arbitrary exports/backups, alternate SQLite suffixes or SQLCipher salt sidecars. Recommend private GitHub visibility and redacting machine-specific details before public release. No redaction, ignore-rule change, staging, commit, remote, publication, service/data/model change or product test performed. Original ending rules/blueprint preserved; all six session documents updated.
+
+## Docker startup recovery — 2026-10-15
+
+User reported `docker compose up --build --wait` failing on the backend dependency. Actual backend logs showed psycopg unable to resolve `postgres` during Alembic startup; PostgreSQL and Redis were healthy. Recreated only backend/frontend using `docker compose up -d --force-recreate --wait backend frontend`, preserving existing database/Redis volumes and unrelated stacks. All four services became healthy; frontend HTTP 200 and `/api/health` status ok/database ready were verified. Recovery establishes successful current startup, not the underlying Docker DNS failure mechanism or full product/container AI compatibility. No application/configuration/dependency change, volume deletion, manual career-data access, model call, commit or publication. Full product checks were not rerun for operational recovery. All six session documents updated; original blueprint and prior validation limits preserved; original ending rules reread.
+
+README Docker troubleshooting — 2026-10-15: documented backend dependency failure diagnosis with Compose status/logs and the verified backend/frontend force-recreation recovery for PostgreSQL hostname resolution failure. Explicitly preserves database/Redis volumes, retains standard build/start instructions, and distinguishes other startup errors. Documentation-only follow-up; inspected README placement/commands against the preceding successful recovery. No new service/data/model changes or product tests. All six session documents maintained; original ending rules and blueprint preserved.
+
+
+## Saved resume diagnosis — 2026-10-15
+
+Read-only inspection found the running Docker frontend/backend on loopback 5173/8000 using PostgreSQL in resume-tailor_postgres_data, with zero resume documents/versions. The separate native backend/resume-tailor.db contains one master and 76 immutable saved versions; latest saved timestamp is 2026-10-14 02:49:05 UTC (October 13, 10:49 p.m. America/Toronto). Counts and timestamps only were inspected, not resume content. Native services are not listening on 5180/8010. The empty Docker workspace does not establish deletion: native and Compose stores are separate. Resume studio also opens a blank new draft by default; use Saved resumes after opening the correct installation. Autosave begins only after the first explicit save. Existing alternate-port restart instructions are in docs/run-windows.md. No services, databases, settings, model calls or dependencies changed; no migration/transfer/commit/publication performed. Product checks were not rerun for this read-only diagnosis. Original ending rules reread and blueprint preserved; all six session documents updated.
+
+
+## Native saved-work restart — 2026-10-15
+
+User authorized starting the native installation to access saved work. Created a consistent SQLite backup in ignored .validation/native-restart-20261015/resume-tailor-before-start.db before launch. Native backend/frontend now run on loopback 8010/5180 with explicit existing SQLite path and frontend proxy; Docker services/volumes remain untouched. Proxied health reports database ready, frontend HTTP 200, and GET /api/resumes returns the existing master at version 76. Opened its direct editor URL in the Codex browser panel. Services intentionally remain running; no migrations, data transfer, resume edits or model calls performed. Full product/browser/PDF checks were not rerun for startup. A combined hidden-process launch command was blocked by automatic policy review; backup and ordinary task-runner launches succeeded separately. Original ending rules were reread in this conversation; all six session documents updated and blueprint preserved.
+
+
+## README saved-work restart — 2026-10-15
+
+README now puts the existing Windows native restart sequence before Docker: explicit existing SQLite path with missing-file check, loopback 8010 backend, 5180 frontend/proxy, reuse of the existing private-upload key, and Saved resumes selection/direct-URL bookmarking. It distinguishes first-time default-port setup from routine restarts and explains separate Docker persistence, first-save/autosave behavior and backups. PowerShell blocks parsed successfully; resolved database URL matches the existing store and save labels were checked against ResumePage.tsx. Documentation only: no application/data/service/dependency/model changes, no product-suite rerun, no commit/publication. All six ending documents updated; original ending rules and blueprint preserved.
+
+
+## Developer onboarding handbook — 2026-10-15
+
+For developer onboarding, trace a complete UI/request/service/repository/storage flow and inspect actual imports/manifests instead of copying blueprint library suggestions. The handbook and new-project architecture template are ordinary repository Markdown documents; no new Codex skill/plugin was created. Check local relative links/heading anchors and source examples for documentation changes; label historical test evidence separately from fresh checks. Maintain all six ending documents and preserve the original blueprint.
+
+Structured experience validation: real disposable SQLCipher browser workflows passed, including new structured entry, HTML/PDF.js, detail-date autosave/reload, existing Phase 4/6 flows, exports and delete-all. Five targeted backend cases and 23 frontend tests passed; the final combined check is recorded in IMPLEMENTATION_STATUS.md. A minimal Chromium reproduction distinguished exact wrapping-label lookup from accessible textbox roles for initially populated textareas; use the accessible role in reload assertions rather than increasing arbitrary waits. No personal data or live model calls.
+
+Final structured experience gates passed: native check (86 backend/23 frontend tests, lint/strict types/generated drift/build), audits with process-local trusted certifi CA configuration, and real disposable SQLCipher browser workflows. No new dependency or reusable skill was installed; see IMPLEMENTATION_STATUS.md for original failures, corrected assertions and current environment limits. Existing product services remain untouched; reload the backend API before using the new fields against a native installation, or rebuild Docker.
+
+
+## Saved-work port correction — 2026-10-16
+
+User reported missing old template on 5173. Read-only counts found native SQLite has one master/80 versions and zero custom-template records/revisions/assets; Docker has zero resumes/custom templates. A separate custom template was not recovered or claimed. Created/preserved ignored .validation/native-restart-20261016/before-start.db via SQLite backup. Stopped only Compose frontend/backend (volumes and PostgreSQL/Redis preserved), then launched native backend/frontend on loopback 8000/5173 against the explicit existing SQLite path. Proxied health reports ready, UI HTTP 200, resume API returns version 80, custom-template API returns empty. Requested opening the saved master directly. README restart commands now use 5173/8000 and explain stopping Docker app services before native startup; run-windows guidance supersedes old alternate-port history. No migration, resume edit, model call, dependency change, commit or publication. Product suite and real PDF/browser rendering were not rerun; operational HTTP checks only. All six session documents updated, original ending rules reread and blueprint preserved.
+
+
+## Experience editor visibility — 2026-10-16
+
+Inspected the actual native resume editor in the in-app browser. The structured editor is present but collapsed behind Add experience. Opened that form and verified Company, Title, Start date, End date, Present, summary and duty controls in the live accessibility tree; screenshot confirms the visible date inputs. No code, resume/library data or settings changed; master remained at version 80. Product tests not rerun for UI navigation. All six ending documents maintained; original blueprint and ending rules preserved.

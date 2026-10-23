@@ -8,6 +8,7 @@ from io import BytesIO
 from uuid import UUID, uuid4
 
 from fastapi import HTTPException
+from pydantic import ValidationError
 from pypdf import PdfReader
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session
@@ -467,7 +468,14 @@ async def pipeline(db: Session, owner: UUID, run: GenerationRun, gateway: Gatewa
                     t for t in terms if any(t.casefold() in v.casefold() for v in allowed.values())
                 ][:20],
                 "character_budget": max_chars,
-                "style_instruction": PRESETS[data.preset] + " " + data.instruction,
+                "style_instruction": PRESETS[data.preset]
+                + " "
+                + data.instruction
+                + (
+                    " Use one sentence on one line, at most 500 characters."
+                    if item.experience_summary
+                    else ""
+                ),
             },
             task,
         )
@@ -487,9 +495,23 @@ async def pipeline(db: Session, owner: UUID, run: GenerationRun, gateway: Gatewa
             for i in dict.fromkeys(rewritten.source_ids)
             if i in allowed
         ]
-        proposed = (
-            Item(key=item.key, text=rewritten.text, origin="ai", source_refs=refs) if refs else None
-        )
+        try:
+            proposed = (
+                Item(
+                    key=item.key,
+                    text=rewritten.text,
+                    origin="ai",
+                    source_refs=refs,
+                    experience_summary=item.experience_summary,
+                )
+                if refs
+                else None
+            )
+        except ValidationError:
+            if not item.experience_summary:
+                raise
+            proposed = None
+            failure = "Rejected: experience summary must be one sentence, at most 500 characters."
         await stage(f"Verifying {section.title}")
         verified = (
             await writer.verify(

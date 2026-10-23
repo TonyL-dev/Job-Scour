@@ -1,3 +1,4 @@
+import re
 from datetime import date, datetime
 from typing import Literal, Self
 from uuid import UUID
@@ -56,9 +57,17 @@ class Item(Contract):
     source_refs: list[SourceRef]
     locked: bool = False
     facts: DisplayFacts | None = None
+    experience_summary: bool = False
 
     @model_validator(mode="after")
     def provenance(self) -> Self:
+        if self.experience_summary and (
+            len(self.text) > 500
+            or "\n" in self.text
+            or "\r" in self.text
+            or re.search(r"[.!?]+[\"')\]]*\s+\S", self.text)
+        ):
+            raise ValueError("Experience summary must be one sentence, at most 500 characters")
         refs = [(ref.entity_type, ref.entity_id) for ref in self.source_refs]
         if len(refs) != len(set(refs)):
             raise ValueError("Duplicate source references")
@@ -74,6 +83,12 @@ class Section(Contract):
     visible: bool = True
     locked: bool = False
     items: list[Item] = Field(max_length=500)
+
+    @model_validator(mode="after")
+    def summary_section(self) -> Self:
+        if self.type != "experience" and any(i.experience_summary for i in self.items):
+            raise ValueError("Experience summaries belong in experience sections")
+        return self
 
 
 class Link(Contract):

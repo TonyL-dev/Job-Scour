@@ -7,6 +7,8 @@ These guides are starting standards for new projects, derived from this applicat
 
 Both guides can be copied independently. Read both when building a full-stack application. Examples use a generic `projects` domain and are illustrative, not additions to this application's API.
 
+For a source-linked explanation of this repository's actual implementation, read the [developer handbook](../developer/README.md), [backend guide](../developer/BACKEND.md) and [frontend guide](../developer/FRONTEND.md). To turn these standards into a new project's concrete architecture/onboarding documentation, copy and complete the [project architecture template](../developer/PROJECT_ARCHITECTURE_TEMPLATE.md). Its proposed layout is explicitly separate from the current application's layout.
+
 ## How to adopt these guides
 
 1. Copy the relevant guide into the new repository's `docs/coding-practices/` directory.

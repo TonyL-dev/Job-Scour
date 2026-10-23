@@ -91,7 +91,13 @@ def build(document: ResumeDocument) -> bytes:
                     )
                 parts.append(paragraph(" · ".join(v for v in values if v), "Heading2"))
             previous = item.facts
-            parts.append(paragraph(item.text, bullet=section.type in {"experience", "projects"}))
+            parts.append(
+                paragraph(
+                    item.text,
+                    bullet=section.type in {"experience", "projects"}
+                    and not item.experience_summary,
+                )
+            )
     from app.rendering.service import template_for
 
     style = template_for(document).default_styles.model_copy(

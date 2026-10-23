@@ -201,7 +201,11 @@ def html(document: ResumeDocument) -> str:
                     )
                 parts.append(f"<p class='facts'>{' · '.join(escape(v) for v in values if v)}</p>")
             previous_facts = item.facts
-            cls = "bullet" if section.type in {"experience", "projects"} else "text"
+            cls = (
+                "bullet"
+                if section.type in {"experience", "projects"} and not item.experience_summary
+                else "text"
+            )
             parts.append(f"<p class='{cls}'>{escape(item.text)}</p></article>")
         parts.append("</section>")
     body = "".join(parts)

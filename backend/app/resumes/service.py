@@ -2,6 +2,7 @@ import base64
 from uuid import UUID
 
 from fastapi import HTTPException
+from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -58,7 +59,13 @@ def validate(
     allow_ai: bool = False,
     protect_ai_locks: bool = True,
 ) -> ResumeDocument:
-    result = content.model_copy(deep=True)
+    # Internal generation/review assignments also have to honor item constraints.
+    try:
+        result = ResumeDocument.model_validate(content.model_dump())
+    except ValidationError as error:
+        raise HTTPException(
+            422, "Invalid resume content: check item text, sources and experience summaries"
+        ) from error
     from app.templates import service as custom
 
     if result.metadata.template_id in {t.id for t in rendering.TEMPLATES}:
