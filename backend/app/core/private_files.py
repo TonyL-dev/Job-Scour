@@ -22,6 +22,8 @@ def key() -> bytes:
 
 
 def encrypt(content: bytes, owner: UUID, identifier: UUID) -> str:
+    # Authenticate identity along with the bytes: moving ciphertext to another
+    # owner or asset ID must fail decryption, even when the storage key is shared.
     nonce = os.urandom(12)
     return base64.b64encode(
         nonce

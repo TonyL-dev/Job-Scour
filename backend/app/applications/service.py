@@ -23,6 +23,8 @@ def list_all(db: Session, owner: UUID) -> list[Application]:
 def save(
     db: Session, owner: UUID, data: ApplicationSave, identifier: UUID | None = None
 ) -> Application:
+    # Track what was actually submitted: exact owned versions, rather than the
+    # document's latest content, which can change after an application is recorded.
     resumes.get_version(db, owner, data.version_id)
     if data.cover_letter_version_id:
         from app.cover_letters import service as letters

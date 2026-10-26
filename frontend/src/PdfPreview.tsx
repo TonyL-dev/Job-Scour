@@ -7,6 +7,8 @@ export function PdfPreview({ encoded }: { encoded: string }) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   useEffect(() => {
+    // Each encoded PDF owns a drawing task. Cleanup destroys that task; checks
+    // after page load/render also detect effects superseded by a newer preview.
     let cancelled = false
     let task: PDFDocumentLoadingTask | undefined
     const target = container.current

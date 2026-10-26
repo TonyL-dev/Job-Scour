@@ -106,6 +106,7 @@ def main() -> None:
         run(sys.executable, "scripts/fresh_install.py")
     elif task == "e2e":
         run(str(PYTHON), "scripts/e2e.py")
+        run(str(PYTHON), "scripts/ui_style.py", "browser")
     elif task == "hooks":
         run(str(PYTHON), "-m", "pre_commit", "install")
     elif task == "renderer-setup":
@@ -119,6 +120,7 @@ def main() -> None:
     elif task in {"api", "api-check"}:
         api(check=task == "api-check")
     elif task == "check":
+        run(sys.executable, "scripts/ui_style.py", "check")
         run(
             str(PYTHON),
             "-m",

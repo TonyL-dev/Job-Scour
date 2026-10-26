@@ -45,6 +45,8 @@ def decrypt(value: str, context: str) -> str:
     secret = key()
     if not value.startswith(PREFIX):
         if secret:
+            # Enabling a key requires offline conversion of existing fields; silently
+            # accepting plaintext here would conceal an incomplete conversion.
             raise RuntimeError(
                 "Plaintext protected field: run python -m app.privacy.encrypt_store "
                 "with the backend stopped"

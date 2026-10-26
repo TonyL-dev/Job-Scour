@@ -148,6 +148,8 @@ async def ready() -> None:
 
 
 def strict_schema(value: Any) -> Any:
+    # Strict output requires every property to be present and omits defaults.
+    # Fields that accept null retain that option in their property schemas.
     if isinstance(value, list):
         return [strict_schema(item) for item in value]
     if not isinstance(value, dict):
@@ -213,6 +215,8 @@ async def structured(model: str, system: str, user: str, schema: dict[str, Any])
             + user
         )
         events = await run(args, folder, prompt)
+        # Reject tool activity even if the CLI also wrote a valid result file;
+        # schema compliance alone does not establish a tool-free response.
         for line in events.splitlines():
             try:
                 event = json.loads(line)

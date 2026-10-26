@@ -16,6 +16,8 @@ async def operation(owner: UUID, identifier: UUID) -> AsyncIterator[None]:
     if key in ACTIVE:
         raise HTTPException(409, "Operation already running; cancel or wait")
     task = asyncio.current_task()
+    # Register the request task itself, unlike durable resume-generation workers.
+    # Explicit cancellation and workspace shutdown must reach its pending inference.
     assert task is not None
     ACTIVE[key] = task
     try:

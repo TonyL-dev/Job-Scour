@@ -81,6 +81,8 @@ def validate(
             original = item.model_copy(deep=True)
             if item.origin != "user" and not allow_ai:
                 raise HTTPException(422, "Use generation review to save AI suggestions")
+            # Employer/title/date fields are source-owned. Discard caller-supplied
+            # display facts and rebuild them from active, owner-scoped records.
             item.facts = None
             for ref in item.source_refs:
                 if (
@@ -185,6 +187,8 @@ def manual_content(
     if content.metadata.job_description_id != existing.content.metadata.job_description_id:
         raise HTTPException(422, "Manual edits must preserve the linked job")
     original = {i.key: i for section in existing.content.sections for i in section.items}
+    # Manual editing may retain saved AI text, but cannot introduce new AI claims
+    # by setting an origin flag. Retained text must still pass current evidence checks.
     for section in content.sections:
         for item in section.items:
             if item.origin == "ai":

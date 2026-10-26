@@ -194,3 +194,9 @@ An onboarded developer should be able to answer each with file/function names an
 8. Update these explanations when the architecture changes, record decisions/evidence, and maintain all six session-ending documents required by repository rules.
 
 Use [the backend change checklist](BACKEND.md#14-change-and-review-recipes) and [the frontend checklist](FRONTEND.md#13-change-and-review-recipes) for implementation details. The reusable architecture template captures the same questions without carrying this product's entities into every new project.
+
+## UI style and refinement
+
+The [UI/UX style specification](../design/UI_UX_STYLE_GUIDE.md) and [portable starter](../design/ui-starter/index.html) define the implemented style for reuse. The [Phase 7 plan](../design/07-ui-refinement-plan.md) is preserved history, and the [clean UI design process](../coding-practices/CLEAN_UI_DESIGN_PROCESS.md) provides the general workflow.
+
+For Phase 7 UI work, read [shared UI components](UI_COMPONENTS.md), [implementation evidence](../design/07-ui-implementation.md) and [Apple website research](../design/apple-website-ui-analysis.md).

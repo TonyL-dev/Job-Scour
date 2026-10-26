@@ -348,6 +348,8 @@ def commit(db: Session, owner: UUID, identifier: UUID, revision: int) -> ImportR
             },
         )
         pending = list(accepted)
+        # @candidate references are import-local keys, not database IDs. Save parents
+        # first, then remap children; a stalled pass means an unresolved dependency.
         while pending:
             advanced = False
             for candidate in list(pending):

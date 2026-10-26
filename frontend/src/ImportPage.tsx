@@ -1,3 +1,4 @@
+import { ActionGroup, StatusNotice, PageHeader, Button } from './components/ui/Controls'
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { NavLink } from 'react-router-dom'
@@ -24,11 +25,12 @@ export function ImportPage() {
   const [retain, setRetain] = useState(false)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
+  const [failed, setFailed] = useState(false)
   function select(value: Run) { setRun(value); setCandidates(value.candidates) }
   async function perform(action: () => Promise<Run>) {
-    setBusy(true); setMessage('')
+    setBusy(true); setFailed(false); setMessage('')
     try { select(await action()); await cache.invalidateQueries({ queryKey: ['imports'] }); await cache.invalidateQueries({ queryKey: ['career'] }) }
-    catch (e) { setMessage(e instanceof Error ? e.message : 'Import failed') }
+    catch (e) { setFailed(true); setMessage(e instanceof Error ? e.message : 'Import failed') }
     finally { setBusy(false) }
   }
   async function saveReview() {
@@ -37,38 +39,38 @@ export function ImportPage() {
     if (!r.data) throw failure(r.error, r.response.status)
     return r.data
   }
-  return <><h1>Import a resume</h1><p>Import content from a text PDF or DOCX, review facts, then build a master. Uploaded layout is not reproduced. OCR is unsupported.</p>
-    {message && <p role="alert">{message}</p>}
-    {forms.isError && <><p role="alert">{forms.error.message}</p><button onClick={() => void forms.refetch()}>Retry career fields</button></>}
-    <section className="status-card"><h2>Upload</h2><p>Maximum 2 MiB, 30 PDF pages, 200,000 extracted characters. Parsing runs locally; AI extraction is optional.</p>
+  return <><PageHeader title="Import a resume" /><p>Import content from a text PDF or DOCX, review facts, then build a master. Uploaded layout is not reproduced. OCR is unsupported.</p>
+    {message && <StatusNotice error={failed}>{message}</StatusNotice>}
+    {forms.isError && <><p role="alert">{forms.error.message}</p><Button onClick={() => void forms.refetch()}>Retry career fields</Button></>}
+    <section className="panel status-card"><h2>Upload</h2><p>Maximum 2 MiB, 30 PDF pages, 200,000 extracted characters. Parsing runs locally; AI extraction is optional.</p>
       <label>Resume file<input type="file" accept=".pdf,.docx" disabled={busy} onChange={e => setFile(e.target.files?.[0])} /></label>
       <label><input type="checkbox" checked={retain} disabled={busy} onChange={e => setRetain(e.target.checked)} />Retain encrypted original (requires a backend upload key)</label>
-      <button disabled={!file || busy} onClick={() => void perform(async () => {
+      <Button variant="primary" disabled={!file || busy} onClick={() => void perform(async () => {
         if (!file || file.size > 2 * 1024 * 1024) throw new Error('Choose a PDF/DOCX up to 2 MiB')
         const bytes = new Uint8Array(await file.arrayBuffer()); let binary = ''; for (const byte of bytes) binary += String.fromCharCode(byte)
         const r = await api.POST('/api/imports', { body: { filename: file.name, mime: file.name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : DOCX, content_base64: btoa(binary), retain_original: retain } })
         if (!r.data) throw failure(r.error, r.response.status); return r.data
-      })}>Parse locally</button>
+      })}>Parse locally</Button>
     </section>
-    <section className="status-card"><h2>Saved imports</h2>{runs.isPending && <p role="status">Loading imports…</p>}{runs.isError && <><p role="alert">{runs.error.message}</p><button onClick={() => void runs.refetch()}>Try again</button></>}
-      {runs.data?.length === 0 && <p>No imports yet.</p>}{runs.data?.map(value => <button key={value.id} disabled={busy} onClick={() => select(value)}>{value.filename} · {value.status}</button>)}
+    <section className="panel status-card collection-panel"><h2>Saved imports</h2>{runs.isPending && <p role="status">Loading imports…</p>}{runs.isError && <><p role="alert">{runs.error.message}</p><Button onClick={() => void runs.refetch()}>Try again</Button></>}
+      {runs.data?.length === 0 && <p>No imports yet.</p>}{runs.data?.map(value => <Button key={value.id} disabled={busy} onClick={() => select(value)}>{value.filename} · {value.status}</Button>)}
     </section>
-    {run && <section className="status-card"><h2>Review {run.filename}</h2><p>Status: {run.status} · revision {run.revision}</p>
+    {run && <section className="panel status-card"><h2>Review {run.filename}</h2><p>Status: {run.status} · revision {run.revision}</p>
       {run.error && <p role="alert">{run.error}</p>}
       <details><summary>Extracted text and source locators (shared if you request AI extraction)</summary>{run.fragments.map(f => <section key={f.locator}><h3>{f.locator}</h3><pre style={{ whiteSpace: 'pre-wrap' }}>{f.text}</pre></section>)}</details>
       {run.status === 'review' && <>
         <p>AI uses the configured import extraction assignment and consented endpoint in <NavLink to="/settings/ai">AI settings</NavLink>. Confirming facts is your review, not independent verification.</p>
-        <button disabled={busy} onClick={() => void perform(async () => { const r = await api.POST('/api/imports/{identifier}/extract', { params: { path: { identifier: run.id }, query: { revision: run.revision } } }); if (!r.data) throw failure(r.error, r.response.status); return r.data })}>Extract candidates with configured AI</button>
-        <button disabled={busy} onClick={() => setCandidates([...candidates, { key: `entry_${candidates.length + 1}`, data: { type: 'project', name: '', description: '' }, locator: run.fragments[0]?.locator ?? '', excerpt: run.fragments[0]?.text.slice(0, 200) ?? '', decision: 'pending', user_supplied: true, duplicate_ids: [] }])}>Add candidate manually</button>
+        <ActionGroup><Button disabled={busy} onClick={() => void perform(async () => { const r = await api.POST('/api/imports/{identifier}/extract', { params: { path: { identifier: run.id }, query: { revision: run.revision } } }); if (!r.data) throw failure(r.error, r.response.status); return r.data })}>Extract candidates with configured AI</Button>
+        <Button disabled={busy} onClick={() => setCandidates([...candidates, { key: `entry_${candidates.length + 1}`, data: { type: 'project', name: '', description: '' }, locator: run.fragments[0]?.locator ?? '', excerpt: run.fragments[0]?.text.slice(0, 200) ?? '', decision: 'pending', user_supplied: true, duplicate_ids: [] }])}>Add candidate manually</Button></ActionGroup>
         {candidates.map((candidate, index) => <CandidateEditor key={`${run.id}:${candidate.key}`} candidate={candidate} forms={forms.data ?? []} records={records.data ?? []} candidates={candidates} disabled={busy} onChange={value => setCandidates(candidates.map((c, i) => i === index ? value : c))} />)}
-        <button disabled={busy} onClick={() => void perform(saveReview)}>Save review</button>
-        <button disabled={busy || !candidates.some(c => c.decision === 'accepted')} onClick={() => void perform(async () => { const saved = await saveReview(); const r = await api.POST('/api/imports/{identifier}/commit', { params: { path: { identifier: run.id }, query: { revision: saved.revision } } }); if (!r.data) throw failure(r.error, r.response.status); return r.data })}>Commit approved facts</button>
-        <button disabled={busy} onClick={() => void perform(async () => { const r = await api.POST('/api/imports/{identifier}/discard', { params: { path: { identifier: run.id }, query: { revision: run.revision } } }); if (!r.data) throw failure(r.error, r.response.status); return r.data })}>Discard import</button>
+        <ActionGroup className="form-footer"><Button disabled={busy} onClick={() => void perform(saveReview)}>Save review</Button>
+        <Button variant="primary" disabled={busy || !candidates.some(c => c.decision === 'accepted')} onClick={() => void perform(async () => { const saved = await saveReview(); const r = await api.POST('/api/imports/{identifier}/commit', { params: { path: { identifier: run.id }, query: { revision: saved.revision } } }); if (!r.data) throw failure(r.error, r.response.status); return r.data })}>Commit approved facts</Button>
+        <Button variant="danger" disabled={busy} onClick={() => void perform(async () => { const r = await api.POST('/api/imports/{identifier}/discard', { params: { path: { identifier: run.id }, query: { revision: run.revision } } }); if (!r.data) throw failure(r.error, r.response.status); return r.data })}>Discard import</Button></ActionGroup>
       </>}
       {run.status === 'committed' && <p>{run.saved_ids.length} approved records saved. <NavLink to="/career/experience">Review career library</NavLink> · <NavLink to="/resumes">Build master resume</NavLink></p>}
-      {run.original_available && <button disabled={busy} onClick={() => void perform(async () => { const r = await api.DELETE('/api/imports/{identifier}/original', { params: { path: { identifier: run.id } } }); if (r.error) throw failure(r.error, r.response.status); return { ...run, original_available: false } })}>Delete retained original</button>}
+      {run.original_available && <Button variant="danger" disabled={busy} onClick={() => void perform(async () => { const r = await api.DELETE('/api/imports/{identifier}/original', { params: { path: { identifier: run.id } } }); if (r.error) throw failure(r.error, r.response.status); return { ...run, original_available: false } })}>Delete retained original</Button>}
     </section>}
-    {busy && <><p role="status">Processing import…</p>{runs.data?.filter(r => r.status === 'parsing').map(r => <button key={r.id} onClick={() => void api.POST('/api/imports/{identifier}/cancel', { params: { path: { identifier: r.id } } })}>Cancel parsing {r.filename}</button>)}{run && <button onClick={() => void api.POST('/api/imports/{identifier}/cancel', { params: { path: { identifier: run.id } } })}>Cancel AI extraction</button>}</>}
+    {busy && <><p role="status">Processing import…</p>{runs.data?.filter(r => r.status === 'parsing').map(r => <Button key={r.id} onClick={() => void api.POST('/api/imports/{identifier}/cancel', { params: { path: { identifier: r.id } } })}>Cancel parsing {r.filename}</Button>)}{run && <Button onClick={() => void api.POST('/api/imports/{identifier}/cancel', { params: { path: { identifier: run.id } } })}>Cancel AI extraction</Button>}</>}
   </>
 }
 
@@ -96,5 +98,5 @@ function CandidateEditor({ candidate, forms, records, candidates, disabled, onCh
 
 function DetailsFields({ value, onChange }: { value: Record<string, string>; onChange: (value: Record<string, string>) => void }) {
   const entries = Object.entries(value)
-  return <span>{entries.map(([key, text], index) => <span className="form-grid" key={index}><input aria-label={`Detail label ${index + 1}`} value={key} onChange={e => { if (entries.some(([other], i) => i !== index && other === e.target.value)) return; onChange(Object.fromEntries(entries.map((entry, i) => i === index ? [e.target.value, text] : entry))) }} /><input aria-label={`Detail value ${index + 1}`} value={text} onChange={e => onChange({ ...value, [key]: e.target.value })} /></span>)}<button type="button" onClick={() => { let number = entries.length + 1; while (`Detail ${number}` in value) number++; onChange({ ...value, [`Detail ${number}`]: '' }) }}>Add detail</button></span>
+  return <span>{entries.map(([key, text], index) => <span className="form-grid" key={index}><input aria-label={`Detail label ${index + 1}`} value={key} onChange={e => { if (entries.some(([other], i) => i !== index && other === e.target.value)) return; onChange(Object.fromEntries(entries.map((entry, i) => i === index ? [e.target.value, text] : entry))) }} /><input aria-label={`Detail value ${index + 1}`} value={text} onChange={e => onChange({ ...value, [key]: e.target.value })} /></span>)}<Button type="button" onClick={() => { let number = entries.length + 1; while (`Detail ${number}` in value) number++; onChange({ ...value, [`Detail ${number}`]: '' }) }}>Add detail</Button></span>
 }

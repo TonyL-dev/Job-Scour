@@ -43,6 +43,8 @@ def before_flush(session: Session, flush_context: object, instances: object) -> 
 def before_commit(session: Session) -> None:
     barrier = session.info.get("workspace_barrier")
     if barrier:
+        # Hold through commit/rollback so invalidation cannot slip between the epoch
+        # check and the database commit. RLock also permits same-thread reentry.
         barrier.lock.acquire()
         try:
             validate_session(session)

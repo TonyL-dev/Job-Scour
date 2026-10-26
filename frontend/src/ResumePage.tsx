@@ -1,3 +1,4 @@
+import { ActionGroup, Button, Disclosure, Tabs, PageHeader, StatusNotice } from './components/ui/Controls'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
@@ -36,6 +37,7 @@ function move<T>(items: T[], index: number, offset: number): T[] {
 }
 
 export function ResumePage() {
+  const [mobileView, setMobileView] = useState<'edit' | 'preview'>('edit')
   const client = useQueryClient()
   const [search] = useSearchParams()
   const requested = search.get('resume')
@@ -52,7 +54,7 @@ export function ResumePage() {
   const [notice, setNotice] = useState('')
   const [sourceRevision, setSourceRevision] = useState(0)
   const [savedSourceRevision, setSavedSourceRevision] = useState(0)
-  const [experienceForm, setExperienceForm] = useState<{ sectionKey: string; record?: CareerRecord }>()
+  const [experienceForm, setExperienceForm] = useState<{ sectionKey: string; record?: CareerRecord; itemKey?: string }>()
   useEffect(() => {
     if (opened.current || !requested || !resumes.data) return
     opened.current = true
@@ -77,6 +79,8 @@ export function ResumePage() {
     const submittedSourceRevision = sourceRevision
     const result = await saveResume(title, submitted, gold, saved, download === 'auto')
     setSavedSourceRevision(submittedSourceRevision)
+    // Always advance the saved version, but apply server-hydrated content only if
+    // the user has not edited the draft while this request was in flight.
     setSaved(result); setContent(previous => JSON.stringify(previous) === JSON.stringify(submitted) ? result.content : previous)
     void client.invalidateQueries({ queryKey: ['resumes'] })
     setNotice('Resume saved.')
@@ -86,6 +90,8 @@ export function ResumePage() {
   const dirty = sourceRevision !== savedSourceRevision || !saved || saved.title !== title || saved.gold_standard !== gold || JSON.stringify(saved.content) !== JSON.stringify(content)
   const { mutate, isPending, error: saveError } = save
   useEffect(() => {
+    // A blank draft requires an explicit first save. Stop after a failed save so
+    // autosave cannot repeatedly retry a conflict against the same stale version.
     if (!autosave || !saved || !dirty || !valid || !title.trim() || isPending || saveError) return
     const timer = setTimeout(() => mutate('auto'), 1800)
     return () => clearTimeout(timer)
@@ -109,9 +115,28 @@ export function ResumePage() {
   function options(section: Section) {
     return history.data?.filter(record => record.data.type !== 'skill_evidence' && (section.type === 'summary' || sources[section.type].includes(record.data.type)) && (record.data.type !== 'achievement' || (section.type === 'experience' ? !!record.data.experience_id : section.type === 'projects' ? !!record.data.project_id : true))) ?? []
   }
+  function experienceRecord(item?: Item): CareerRecord | undefined {
+    if (!item) return undefined
+    const ids = item.source_refs.flatMap(ref => {
+      if (ref.entity_type === 'experience') return [ref.entity_id]
+      const source = history.data?.find(record => record.id === ref.entity_id)
+      return source?.data.type === 'achievement' && source.data.experience_id ? [source.data.experience_id] : []
+    })
+    return history.data?.find(record => record.data.type === 'experience' && ids.includes(record.id))
+  }
+  function experienceGroup(item?: Item): string | undefined {
+    // Prefer source identity; retired/unavailable sources fall back to saved facts.
+    // This groups editor headings without merging independently locked text items.
+    if (!item) return undefined
+    const source = experienceRecord(item)
+    if (source) return source.id
+    return item.facts ? JSON.stringify([item.facts.employer, item.facts.title, item.facts.start_date, item.facts.end_date, item.facts.current]) : item.key
+  }
   function experienceSaved(record: CareerRecord, sectionKey: string, items?: Item[]) {
     if (record.data.type !== 'experience') return
     const data = record.data
+    // A library edit can affect retained AI facts without changing draft JSON.
+    // Track it separately so the next resume save revalidates and hydrates facts.
     setSourceRevision(revision => revision + 1)
     const facts = { employer: data.company, title: data.job_title, start_date: data.start_date, end_date: data.end_date, current: data.current, location: data.location }
     setContent(previous => ({ ...previous, sections: previous.sections.map(section => ({
@@ -124,62 +149,65 @@ export function ResumePage() {
     setNotice(items ? 'Experience saved to the career library and added to this draft.' : 'Career details updated. Save the resume to capture the updated facts.')
   }
   return <>
-    <p className="eyebrow">RESUME STUDIO</p><h1>Shape your story.</h1><p className="intro">Edit your master or tailored resume by hand. Text edits are recorded as user content. Pick from your library, arrange sections, and preview the actual PDF as you edit.</p>
-    {(templates.error || resumes.error || history.error) && <div role="alert"><p>{templates.error?.message ?? resumes.error?.message ?? history.error?.message}</p><button onClick={() => { void templates.refetch(); void resumes.refetch(); void history.refetch() }}>Retry</button></div>}
-    <div className="toolbar"><label>Saved resumes<select aria-label="Saved resumes" value={saved?.id ?? ''} onChange={e => openResume(resumes.data?.find(r => r.id === e.target.value))}><option value="">New master resume</option>{resumes.data?.map(r => <option key={r.id} value={r.id}>{r.title}</option>)}</select></label><button className="secondary" onClick={() => openResume()}>New resume</button></div>
-    <label className="check"><input type="checkbox" checked={autosave} onChange={e => setAutosave(e.target.checked)} />Autosave edits after first save</label>{saved && <Link to={`/history?resume=${saved.id}`}>History & ATS guidance →</Link>}
-    <div className="studio">
-      <div className="resume-controls">
-        <section className="editor-form"><h2>Resume details</h2><label>Resume title<input value={title} required onChange={e => setTitle(e.target.value)} /></label>
+    <PageHeader eyebrow="RESUME STUDIO" title="Shape your story." description="Edit your content, refine its appearance, and preview the actual PDF." />
+    {(templates.error || resumes.error || history.error) && <div role="alert"><p>{templates.error?.message ?? resumes.error?.message ?? history.error?.message}</p><Button onClick={() => { void templates.refetch(); void resumes.refetch(); void history.refetch() }}>Retry</Button></div>}
+    <div className="toolbar"><label>Saved resumes<select aria-label="Saved resumes" value={saved?.id ?? ''} onChange={e => openResume(resumes.data?.find(r => r.id === e.target.value))}><option value="">New master resume</option>{resumes.data?.map(r => <option key={r.id} value={r.id}>{r.title}</option>)}</select></label><Button variant="secondary" onClick={() => openResume()}>New resume</Button></div>
+    <div className="document-meta"><label className="check"><input type="checkbox" checked={autosave} onChange={e => setAutosave(e.target.checked)} />Autosave edits after first save</label>{saved && <Link to={`/history?resume=${saved.id}`}>History & ATS guidance →</Link>}</div>
+    <div className="toolbar document-toolbar"><span className="document-status" role="status">{save.isPending ? 'Saving…' : save.error ? 'Save failed — your draft is retained' : dirty ? saved ? 'Unsaved changes' : 'New draft · save to enable autosave' : `Saved · version ${saved?.version_number}`}</span><ActionGroup><Button variant="primary" disabled={!valid || !title.trim() || save.isPending} onClick={() => save.mutate(false)}>{save.isPending ? 'Saving…' : saved?.kind === 'tailored' ? 'Save tailored edits' : 'Save master'}</Button><Button disabled={!valid || !title.trim() || save.isPending} onClick={() => save.mutate(true)}>Save & download PDF</Button></ActionGroup></div>
+    {save.error && <StatusNotice error>{save.error.message}</StatusNotice>}{notice && <StatusNotice>{notice}</StatusNotice>}
+    <div className="segmented-control studio-switch" role="group" aria-label="Studio view"><Button aria-pressed={mobileView === 'edit'} onClick={() => setMobileView('edit')}>Edit</Button><Button aria-pressed={mobileView === 'preview'} onClick={() => setMobileView('preview')}>Preview</Button></div>
+    <div className="studio" data-mobile-view={mobileView}>
+      <div className="resume-controls"><Tabs label="Resume editor" tabs={[{ label: 'Content', content: <>
+        <section className="panel editor-form"><h2>Resume details</h2><label>Resume title<input value={title} required onChange={e => setTitle(e.target.value)} /></label>
           <label className="check"><input type="checkbox" disabled={saved?.kind === 'tailored'} checked={gold} onChange={e => setGold(e.target.checked)} />Use as my gold standard master</label>
           <div className="form-grid">{(['name', 'email', 'phone', 'location'] as const).map(field => <label key={field}>{field === 'name' ? 'Full name *' : field.charAt(0).toUpperCase() + field.slice(1)}<input value={content.header[field] ?? ''} onChange={e => setContent({ ...content, header: { ...content.header, [field]: e.target.value } })} /></label>)}</div>
           <label>Contact links (label | URL, one per line)<textarea value={content.header.links?.map(l => `${l.label} | ${l.url}`).join('\n') ?? ''} onChange={e => setContent({ ...content, header: { ...content.header, links: e.target.value.split('\n').filter(Boolean).map(line => { const [label, ...url] = line.split('|'); return { label: label?.trim() ?? '', url: url.join('|').trim() } }) } })} /></label>
         </section>
-        <section className="editor-form"><h2>Template & style</h2><div className="form-grid">
+
+        {content.sections.map((section, index) => <section id={`section-${section.key}`} key={section.key} className="panel editor-form section-editor">
+          <div className="toolbar"><h2>{section.title}</h2><Disclosure title="Section actions" className="context-actions"><ActionGroup><Button variant="ghost" disabled={index === 0} aria-label={`Move ${section.title} up`} onClick={() => setContent({ ...content, sections: move(content.sections, index, -1) })}>Move up</Button><Button variant="ghost" disabled={index === content.sections.length - 1} aria-label={`Move ${section.title} down`} onClick={() => setContent({ ...content, sections: move(content.sections, index, 1) })}>Move down</Button><Button variant="danger" aria-label={`Remove ${section.title} section`} onClick={() => setContent({ ...content, sections: content.sections.filter((_, i) => i !== index) })}>Remove</Button></ActionGroup></Disclosure></div>
+          <label>Section title<input value={section.title} onChange={e => updateSection(index, { title: e.target.value })} /></label>
+          <ActionGroup><label className="check"><input type="checkbox" checked={section.visible ?? true} onChange={e => updateSection(index, { visible: e.target.checked })} />Visible</label><label className="check"><input type="checkbox" checked={section.locked ?? false} onChange={e => updateSection(index, { locked: e.target.checked })} />Protect from future AI edits</label></ActionGroup>
+          {section.type === 'experience' && <>
+            <p>Company, title and dates come from your career library. Summaries render as paragraphs and duties as bullets; use Item actions to arrange them.</p>
+            <Button variant="secondary" onClick={() => setExperienceForm({ sectionKey: section.key })}>Add experience</Button>
+            {experienceForm?.sectionKey === section.key && !experienceForm.record && <ExperienceForm key="new" record={experienceForm.record} onCancel={() => setExperienceForm(undefined)} onSaved={(record, items) => experienceSaved(record, section.key, items)} />}
+          </>}
+          {section.items.map((item, itemIndex) => {
+            const record = experienceRecord(item)
+            const beginsExperience = section.type === 'experience' && experienceGroup(item) !== experienceGroup(section.items[itemIndex - 1])
+            return <div id={`item-${item.key}`} className={`item-editor${section.type === 'experience' && !beginsExperience ? ' continued-experience' : ''}`} key={item.key}>
+            {section.type === 'experience' && <>
+              {beginsExperience && item.facts && <div className="experience-heading"><h3>{[item.facts.title, item.facts.employer].filter(Boolean).join(' · ')}</h3><p className="source-note">{[item.facts.start_date, item.facts.current ? 'Present' : item.facts.end_date].filter(Boolean).join(' – ')}</p></div>}
+              {beginsExperience && record && <div className="experience-tools"><Button variant="ghost" onClick={() => setExperienceForm({ sectionKey: section.key, record, itemKey: item.key })}>Edit details: {recordLabel(record)}</Button></div>}
+              {experienceForm?.sectionKey === section.key && experienceForm.record && experienceForm.itemKey === item.key && <ExperienceForm key={experienceForm.record.id} record={experienceForm.record} onCancel={() => setExperienceForm(undefined)} onSaved={(record, items) => experienceSaved(record, section.key, items)} />}
+              <label>Experience text type<select value={item.experience_summary ? 'summary' : 'duty'} onChange={e => updateItem(index, itemIndex, { experience_summary: e.target.value === 'summary' })}><option value="summary">Summary (one sentence)</option><option value="duty">Duty (bullet point)</option></select></label>
+            </>}
+            <label>{section.type === 'experience' ? item.experience_summary ? 'Summary (one sentence max)' : 'Duty (bullet point)' : 'Item text'}<textarea aria-invalid={!!item.experience_summary && summaryError(item.text)} aria-describedby={item.experience_summary && summaryError(item.text) ? `item-error-${item.key}` : undefined} value={item.text} onChange={e => updateItem(index, itemIndex, { text: e.target.value })} /></label>
+            {item.experience_summary && summaryError(item.text) && <p id={`item-error-${item.key}`} role="alert">Use one sentence on one line, at most 500 characters. Avoid periods in abbreviations.</p>}
+            <p className="source-note">{item.source_refs.length ? item.source_refs.map(ref => { const record = history.data?.find(r => r.id === ref.entity_id); return record ? recordLabel(record) : 'Retired or unavailable source (saved snapshot preserved)' }).join(' · ') : 'Manual draft · unverified'}</p>
+            <ActionGroup><Disclosure title="Item actions" className="context-actions"><ActionGroup><Button variant="ghost" aria-label="Move item up" disabled={itemIndex === 0} onClick={() => updateSection(index, { items: move(section.items, itemIndex, -1) })}>Move up</Button><Button variant="ghost" aria-label="Move item down" disabled={itemIndex === section.items.length - 1} onClick={() => updateSection(index, { items: move(section.items, itemIndex, 1) })}>Move down</Button><Button variant="danger" onClick={() => updateSection(index, { items: section.items.filter((_, i) => i !== itemIndex) })}>Remove item</Button></ActionGroup></Disclosure><label className="check"><input type="checkbox" checked={item.locked ?? false} onChange={e => updateItem(index, itemIndex, { locked: e.target.checked })} />Protect item</label></ActionGroup>
+          </div>})}
+          <ActionGroup><Button variant="secondary" onClick={() => addItem(index)}>Add manual text</Button><label>Add from library<select aria-label="Add from library" value="" onChange={e => { const record = history.data?.find(r => r.id === e.target.value); if (record) addItem(index, record) }}><option value="">Choose a source…</option>{options(section).map(record => <option key={record.id} value={record.id}>{recordLabel(record)}</option>)}</select></label></ActionGroup>
+        </section>)}
+        <div className="panel editor-form actions"><label>New section<select aria-label="New section" value={newType} onChange={e => setNewType(e.target.value as Section['type'])}>{sectionTypes.map(t => <option key={t} value={t}>{t}</option>)}</select></label><Button variant="secondary" onClick={() => setContent({ ...content, sections: [...content.sections, { key: crypto.randomUUID(), type: newType, title: newType.charAt(0).toUpperCase() + newType.slice(1), visible: true, locked: false, items: [] }] })}>Add section</Button></div>
+      </> }, { label: 'Appearance', content: <>        <section className="panel editor-form"><h2>Template & style</h2><div className="form-grid">
           <label>Template<select aria-label="Template" value={content.metadata.template_id} onChange={e => setContent({ ...content, metadata: { ...content.metadata, template_id: e.target.value } })}>{templates.data?.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
           <label>Page target<input type="number" min="1" max="10" value={content.metadata.target_page_limit ?? 2} onChange={e => setContent({ ...content, metadata: { ...content.metadata, target_page_limit: Number(e.target.value) } })} /></label>
           <label>Font<select aria-label="Font" value={content.metadata.style_overrides?.font_family ?? ''} onChange={e => setContent({ ...content, metadata: { ...content.metadata, style_overrides: { ...content.metadata.style_overrides, font_family: (e.target.value || null) as 'sans' | 'serif' | null } } })}><option value="">Template default</option><option value="sans">Sans serif</option><option value="serif">Serif</option></select></label>
           {([{ key: 'font_size_pt', label: 'Font size (pt)', min: 9, max: 14, step: .5 }, { key: 'line_height', label: 'Line height', min: 1, max: 2, step: .05 }, { key: 'margin_mm', label: 'Margins (mm)', min: 10, max: 30, step: 1 }, { key: 'section_spacing_mm', label: 'Section spacing (mm)', min: 0, max: 15, step: 1 }] as const).map(field => <label key={field.key}>{field.label}<input type="number" min={field.min} max={field.max} step={field.step} placeholder="Default" value={content.metadata.style_overrides?.[field.key] ?? ''} onChange={e => setContent({ ...content, metadata: { ...content.metadata, style_overrides: { ...content.metadata.style_overrides, [field.key]: e.target.value === '' ? null : Number(e.target.value) } } })} /></label>)}
           <label>Accent color<input type="color" value={content.metadata.style_overrides?.accent_color ?? '#24362e'} onChange={e => setContent({ ...content, metadata: { ...content.metadata, style_overrides: { ...content.metadata.style_overrides, accent_color: e.target.value } } })} /></label>
-        </div></section>
-        {content.sections.map((section, index) => <section id={`section-${section.key}`} key={section.key} className="editor-form section-editor">
-          <div className="toolbar"><h2>{section.type}</h2><div className="actions"><button className="secondary" disabled={index === 0} aria-label={`Move ${section.title} up`} onClick={() => setContent({ ...content, sections: move(content.sections, index, -1) })}>↑</button><button className="secondary" disabled={index === content.sections.length - 1} aria-label={`Move ${section.title} down`} onClick={() => setContent({ ...content, sections: move(content.sections, index, 1) })}>↓</button><button className="secondary" aria-label={`Remove ${section.title} section`} onClick={() => setContent({ ...content, sections: content.sections.filter((_, i) => i !== index) })}>Remove</button></div></div>
-          <label>Section title<input value={section.title} onChange={e => updateSection(index, { title: e.target.value })} /></label>
-          <div className="actions"><label className="check"><input type="checkbox" checked={section.visible ?? true} onChange={e => updateSection(index, { visible: e.target.checked })} />Visible</label><label className="check"><input type="checkbox" checked={section.locked ?? false} onChange={e => updateSection(index, { locked: e.target.checked })} />Protect from future AI edits</label></div>
-          {section.type === 'experience' && <>
-            <p>Company, title and dates come from your career library. Summaries render as paragraphs and duties as bullets; use the arrows to arrange them.</p>
-            {[...new Set(section.items.flatMap(item => item.source_refs.flatMap(ref => {
-              if (ref.entity_type === 'experience') return [ref.entity_id]
-              const record = history.data?.find(r => r.id === ref.entity_id)
-              return record?.data.type === 'achievement' && record.data.experience_id ? [record.data.experience_id] : []
-            })))].map(id => { const record = history.data?.find(r => r.id === id && r.data.type === 'experience'); return record && <button key={id} className="secondary" onClick={() => setExperienceForm({ sectionKey: section.key, record })}>Edit details: {recordLabel(record)}</button> })}
-            <button className="secondary" onClick={() => setExperienceForm({ sectionKey: section.key })}>Add experience</button>
-            {experienceForm?.sectionKey === section.key && <ExperienceForm key={experienceForm.record?.id ?? 'new'} record={experienceForm.record} onCancel={() => setExperienceForm(undefined)} onSaved={(record, items) => experienceSaved(record, section.key, items)} />}
-          </>}
-          {section.items.map((item, itemIndex) => <div id={`item-${item.key}`} className="item-editor" key={item.key}>
-            {section.type === 'experience' && <>
-              {item.facts && <p className="source-note">{[item.facts.title, item.facts.employer, item.facts.start_date, item.facts.current ? 'Present' : item.facts.end_date].filter(Boolean).join(' · ')}</p>}
-              <label>Experience text type<select value={item.experience_summary ? 'summary' : 'duty'} onChange={e => updateItem(index, itemIndex, { experience_summary: e.target.value === 'summary' })}><option value="summary">Summary (one sentence)</option><option value="duty">Duty (bullet point)</option></select></label>
-            </>}
-            <label>{section.type === 'experience' ? item.experience_summary ? 'Summary (one sentence max)' : 'Duty (bullet point)' : 'Item text'}<textarea value={item.text} onChange={e => updateItem(index, itemIndex, { text: e.target.value })} /></label>
-            {item.experience_summary && summaryError(item.text) && <p role="alert">Use one sentence on one line, at most 500 characters. Avoid periods in abbreviations.</p>}
-            <p className="source-note">{item.source_refs.length ? item.source_refs.map(ref => { const record = history.data?.find(r => r.id === ref.entity_id); return record ? recordLabel(record) : 'Retired or unavailable source (saved snapshot preserved)' }).join(' · ') : 'Manual draft · unverified'}</p>
-            <div className="actions"><button className="secondary" aria-label="Move item up" disabled={itemIndex === 0} onClick={() => updateSection(index, { items: move(section.items, itemIndex, -1) })}>↑</button><button className="secondary" aria-label="Move item down" disabled={itemIndex === section.items.length - 1} onClick={() => updateSection(index, { items: move(section.items, itemIndex, 1) })}>↓</button><button className="secondary" onClick={() => updateSection(index, { items: section.items.filter((_, i) => i !== itemIndex) })}>Remove item</button><label className="check"><input type="checkbox" checked={item.locked ?? false} onChange={e => updateItem(index, itemIndex, { locked: e.target.checked })} />Protect item</label></div>
-          </div>)}
-          <div className="actions"><button className="secondary" onClick={() => addItem(index)}>Add manual text</button><label>Add from library<select aria-label="Add from library" value="" onChange={e => { const record = history.data?.find(r => r.id === e.target.value); if (record) addItem(index, record) }}><option value="">Choose a source…</option>{options(section).map(record => <option key={record.id} value={record.id}>{recordLabel(record)}</option>)}</select></label></div>
-        </section>)}
-        <div className="editor-form actions"><label>New section<select aria-label="New section" value={newType} onChange={e => setNewType(e.target.value as Section['type'])}>{sectionTypes.map(t => <option key={t} value={t}>{t}</option>)}</select></label><button onClick={() => setContent({ ...content, sections: [...content.sections, { key: crypto.randomUUID(), type: newType, title: newType.charAt(0).toUpperCase() + newType.slice(1), visible: true, locked: false, items: [] }] })}>Add section</button></div>
-      </div>
+        </div></section></> }]} /></div>
       <aside className="preview-panel"><div className="toolbar"><h2>Live preview</h2><span className="pill">{preview.data ? `${preview.data.page_count} ${preview.data.page_count === 1 ? 'page' : 'pages'}` : 'A4'}</span></div>
         <label>Preview format<select aria-label="Preview format" value={view} onChange={e => setView(e.target.value as 'pdf' | 'html')}><option value="pdf">PDF (exact pagination)</option><option value="html">HTML (continuous, accessible text)</option></select></label>
         {preview.isFetching && <p role="status">Updating preview…</p>}
-        {preview.error && <div role="alert"><p>{preview.error.message}</p><button type="button" disabled={preview.isFetching} onClick={() => void preview.refetch()}>Retry preview</button></div>}
+        {preview.error && <div role="alert"><p>{preview.error.message}</p><Button type="button" disabled={preview.isFetching} onClick={() => void preview.refetch()}>Retry preview</Button></div>}
         {preview.data?.warnings.map(w => <p className="warning" key={w}>{w}</p>)}
         {!valid && <p>Enter your name and complete each item to see a preview.</p>}
         {preview.data && (view === 'pdf' ? <PdfPreview encoded={preview.data.pdf_base64} /> : <iframe title="Resume HTML preview" sandbox="" srcDoc={preview.data.html} />)}
         <p className="source-note">PDF preview shows the same rendered pages used for download. HTML preview uses a continuous page layout.</p>
-        <div className="actions"><button disabled={!valid || !title.trim() || save.isPending} onClick={() => save.mutate(false)}>{save.isPending ? 'Saving…' : saved?.kind === 'tailored' ? 'Save tailored edits' : 'Save master'}</button><button disabled={!valid || !title.trim() || save.isPending} onClick={() => save.mutate(true)}>Save & download PDF</button></div>
-        {save.error && <p role="alert">{save.error.message}</p>}{notice && <p role="status">{notice}</p>}<p className="source-note">{dirty ? 'Unsaved changes' : `Saved · version ${saved?.version_number}`}</p>
+
+
       </aside>
     </div>
   </>

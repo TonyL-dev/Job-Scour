@@ -269,6 +269,8 @@ def create(db: Session, owner: UUID, data: ReportInput) -> Report:
     parsed = VisibleText()
     parsed.feed(rendered.html)
     expected_text = parsed.segments
+    # Search forward through the extracted PDF, rather than checking membership:
+    # every visible segment must survive in the same reading order.
     position = 0
     absent = []
     for value in expected_text:

@@ -78,6 +78,8 @@ export async function readAnalysisStream(stream: ReadableStream<Uint8Array>, sta
   try {
     while (true) {
       const { done, value } = await reader.read()
+      // Network chunks can split both UTF-8 characters and SSE messages. Keep the
+      // decoder state and unfinished frame until a complete blank-line boundary.
       buffer += decoder.decode(value, { stream: !done }).replace(/\r/g, '')
       let boundary: number
       while ((boundary = buffer.indexOf('\n\n')) >= 0) {

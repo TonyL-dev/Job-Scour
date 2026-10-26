@@ -206,6 +206,8 @@ async def match(
             )
         )
     items.sort(key=lambda item: (-item.score, str(item.source_ref.entity_id)))
+    # Embedding calls yield control and may commit cache entries. Re-read active
+    # evidence so the caller cannot persist a match for an obsolete career snapshot.
     if snapshot_digest(career_records(db, owner)) != snapshot:
         raise HTTPException(409, "Career library changed during matching. Retry the saved job.")
     return MatchAnalysis(

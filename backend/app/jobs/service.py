@@ -83,6 +83,8 @@ async def analyze(
             analysis,
         )
     analysis = row.analysis
+    # The cache covers posting interpretation only. Matching must run again so
+    # career edits/retirements take effect even when the posting is unchanged.
     if progress:
         await progress("Matching current career evidence")
     matched = await match(db, owner, job, analysis, gateway, use_embeddings, progress)

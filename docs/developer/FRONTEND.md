@@ -45,7 +45,11 @@ src/
   RouteRecovery.tsx     render-error recovery and route focus
   QueryNotice.tsx       small shared loading/error/retry presentation
   PdfPreview.tsx        PDF.js resource lifecycle and canvases
-  styles.css            global and feature class rules
+  styles.css            application shell and feature composition
+  styles/tokens.css     semantic visual tokens
+  styles/foundation.css portable controls/typography/panels
+  components/Navigation.tsx grouped sidebar/native narrow dialog
+  components/ui/Controls.tsx shared accessible presentation controls
   api/
     openapi.json        generated backend contract
     schema.d.ts         generated TypeScript declarations
@@ -353,7 +357,7 @@ PDF worker delivery must be verified in production Nginx. A previous real failur
 
 ## 11. CSS, accessibility and recovery
 
-[`styles.css`](../../frontend/src/styles.css) defines the application shell, colors, native controls, feature panels, responsive layout and reduced-motion behavior. It uses semantic classes such as `.workspace`, `.sidebar`, `.editor-form`, `.studio`, `.preview-panel`, `.record-card` and `.warning`. Shared class names have broad effects because this is a global stylesheet, not CSS Modules or a utility framework.
+[`styles.css`](../../frontend/src/styles.css) imports [tokens](../../frontend/src/styles/tokens.css) and the [portable foundation](../../frontend/src/styles/foundation.css), then defines application shell and feature composition. Tokens/foundation own colors, typography, native controls, panels, segmented controls, responsive primitives and reduced-motion/forced-colors behavior. The [UI/UX style specification](../design/UI_UX_STYLE_GUIDE.md) is the exact reusable visual contract; [component guidance](UI_COMPONENTS.md) records component APIs and state/focus behavior. It uses semantic classes such as `.workspace`, `.sidebar`, `.editor-form`, `.studio`, `.preview-panel`, `.record-card` and `.warning`. Shared class names have broad effects because this is a global stylesheet, not CSS Modules or a utility framework.
 
 The shell is flex-based; editor/preview layouts use grid; controls/panels use `min-width: 0` and wrapping to avoid long content breaking the viewport. Application UI fonts are system fonts; document export fonts are separately bundled Noto assets. Changing the UI font does not automatically change document pagination.
 

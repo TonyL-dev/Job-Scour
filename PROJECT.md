@@ -1738,3 +1738,35 @@ Inspected the actual native resume editor in the in-app browser. The structured 
 ## Backend learning companion — 2026-10-22
 
 User requested concepts to read about, grouped by BACKEND.md section number. Added BACKEND_READING_LIST.md with prerequisites, section-specific vocabulary/plain-language definitions, learning goals and suggested study order; linked it from the backend guide/index. Documentation validation only; no implementation, personal data/service/model/dependency/commit/remote/publication changes. Original blueprint and unresolved checks preserved; ending rules reread and all six session documents updated.
+
+
+## UI refinement planning — 2026-10-22
+
+The user requested a plan for a minimal, clean, Apple-inspired UI and a reusable design process. Proposed next Phase 7 is docs/design/07-ui-refinement-plan.md: 7A audit/wireframes, 7B tokens/components, 7C shell/Resume Studio, 7D core workflows, 7E remaining screens, 7F usability/release acceptance. This planning proposal precedes the remaining differentiators; completed phases and the original blueprint are preserved. No UI implementation is claimed or authorized by this request. Reusable method: docs/coding-practices/CLEAN_UI_DESIGN_PROCESS.md. All six ending documents updated; original ending rules reread. No service/data/model/dependency/commit/publication changes.
+
+
+## Phase 7 implementation and Apple UI analysis — 2026-10-25
+
+The user authorized Phase 7 implementation, then requested direct Apple website analysis. Implementation follows the planned 7A–7F scope with reusable controls/tokens, grouped shell/navigation, reorganized Studio/review/version/settings actions and responsive states. See docs/design/07-ui-implementation.md for route/action inventory and validation status, and docs/design/apple-website-ui-analysis.md for the detailed research. The original blueprint and completed historical acceptance remain preserved. Phase 7 final release acceptance is pending; participant targets cannot be asserted from automation. No personal-data editing, live inference, deployment, commit, remote or publication occurred.
+
+
+Phase 7 final native evidence — 2026-10-25: Phase 7 implementation and native regression/release work is delivered; final check, audit, expanded encrypted-storage/PDF browser workflows and fresh installation passed. Exact evidence and remaining 7F manual/external gates are in docs/design/07-ui-implementation.md. The requested direct Apple website breakdown is in docs/design/apple-website-ui-analysis.md; the reusable clean-UI process and component guidance are maintained. All six ending files updated, original ending rules reread and blueprint preserved. Do not mark representative usability targets or untested environments complete. No personal-store/model/deployment/commit/remote/publication operation occurred.
+
+
+## Apple-inspired UI and reusable style specification — 2026-10-25
+
+User explicitly requested applying the direct Apple website analysis to the UI and documenting the exact style thoroughly for future websites. The refinement supplies portable tokens/foundation, updated app composition and contextual controls, a 20-section UI_UX_STYLE_GUIDE.md with generated token appendix and copyable implementation prompt, plus a standalone HTML/CSS/JS reference kit. Original blueprint and historical phase evidence are retained. Current acceptance is recorded in IMPLEMENTATION_STATUS.md; implementation does not imply participant usability or unverified deployment acceptance.
+
+
+Clean workspace 1.0 final native evidence — 2026-10-25: Final check passed (Ruff lint/format across 155 files, mypy 119 source files, 86 backend/26 frontend tests, ESLint, strict TypeScript, generated API drift and production build). Python/pnpm audits passed with no known vulnerabilities. Product e2e passed A/D/E/F, 6A–6F, structured experience and Phase 7 keyboard/responsive workflows with disposable SQLCipher, actual Chromium/PDF.js and synthetic model responses. The distributed reference browser passed 320/390/768/1280/1440px reflow, keyboard/draft/focus/control checks with zero page errors or remote requests. Eleven principal contrast pairs and exact CSS/manifest/documented-token synchronization passed; 94 local documentation links/assets were verified. Final isolated fresh-install passed production browser/PDF/ATS/outage/restart after correcting new test-only TypeScript fixture/query errors; the first failed run remains recorded in docs/design/07-ui-implementation.md. Desktop/editor/narrow/reference/forced-colors screenshots were reviewed. Canonical reusable specification: docs/design/UI_UX_STYLE_GUIDE.md; exact portable kit: docs/design/ui-starter/. All six ending documents maintained and original ending rules reread; blueprint preserved. No new follow-up dependencies/API contracts, personal-store operations, live inference, deployment, commits, remotes or publication. Successful disposable harness services/stores cleaned up by their own finally blocks. Earlier ignored failed-run stores and inherited security findings remain. Representative task/timing studies, actual 200% browser zoom, screen-reader interoperability, Docker/Nginx, hosted CI, clean OS, native Word and live Codex container login were not newly verified.
+
+
+## Application comment audit — 2026-10-26
+
+User requested a comment audit of the application. Added 80 explanatory comment lines in 29 backend/frontend source files, covering save races, immutable versions, source authority, AI admission/configuration, evidence refresh, import/profile/prompt review, privacy epochs, rendering/export and SSE/PDF lifecycles. Added docs/developer/COMMENT_AUDIT.md. The audit changes comments/documentation only and preserves the original blueprint and prior uncommitted work. All six ending documents are maintained. Validation evidence follows in IMPLEMENTATION_STATUS.md; no service/data/model/dependency/contract/deployment/commit/publication operations were requested or performed by this audit.
+
+
+## Git lock diagnosis — 2026-10-26
+
+Commit troubleshooting found a zero-byte .git/index.lock last modified October 25 at 12:41 p.m. local time, with no git/ssh/gpg process matching the read-only process check. This suggests an abandoned index lock; the originating operation is unknown and a process snapshot cannot exclude later activity. Guidance: finish/close Git operations, remove only the stale index.lock, then retry the commit. The lock was not removed; no staging, commit, remote, application/service/data/model changes or product tests occurred. All six ending documents maintained; original blueprint and prior verification limits preserved.
+

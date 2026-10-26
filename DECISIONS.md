@@ -253,3 +253,35 @@ Inspected the actual native resume editor in the in-app browser. The structured 
 ## Backend learning companion — 2026-10-22
 
 Teach the backend through prerequisites, exact search vocabulary and a learning goal per existing numbered section. Separate conceptual related topics (such as bounded contexts) from claims of implemented patterns. Explain distinctions including DTO/ORM, DB/login sessions, relevance/truth, hashing/encryption and request-owned/persisted work.
+
+
+## UI refinement planning — 2026-10-22
+
+Propose a user-requested UI refinement phase next after Phase 6, ahead of remaining differentiators, without rewriting the original blueprint. Interpret Apple-inspired as restrained hierarchy, spacing and predictable controls. Prefer existing CSS/React with explicit variants over a framework migration; begin with Resume Studio. Use a neutral light palette and one accent as a proposed direction, with contrast and usability gates. No new backend/API/storage behavior or UI implementation is authorized by the planning request.
+
+
+## Phase 7 implementation and Apple UI analysis — 2026-10-25
+
+Use native details/summary with Escape/focus return for occasional actions rather than introducing an incomplete ARIA menu. Use a native dialog for narrow navigation and accessible mounted tabs for Content/Appearance. Keep save/download at document level and retain first-save/autosave semantics. Treat Apple website values as measured examples, not universal tokens: desktop homepage headline 56px/medium48px/narrow32px, selected narrow cards radius28px, and marketing-scale gaps are adapted to a working editor. Bounded dependency patches address newly reported audit findings without changing framework or application contracts.
+
+
+Phase 7 final native evidence — 2026-10-25: Resolve new release-audit findings with bounded compatible pins (pypdf6.21.2, certifi2026.10.19, filelock4.2.1, setuptools84.1.0, virtualenv21.14.10, Vite8.3.3 and pnpm-resolved Zod4.6.7/Undici8.12.3). Keep initial failures and final retests separate. Keep 44px app controls despite sampled Apple marketing controls being smaller; neutral palette and grouped actions matter more than copying every radius/marketing gap. No participant or deployment acceptance can be inferred from native automation.
+
+
+## Apple-inspired UI and reusable style specification — 2026-10-25
+
+Use Clean workspace style 1.0.0 as an explicit, reproducible visual contract: action blue #0071E3, links #0066CC, neutral #F5F5F7 canvas, white borderless 24px panels, 28px feature cards, pill actions and dark selected segments. Keep system fonts and 44px minimum targets; adapt marketing typography to a working app. Share actual CSS with the portable kit and detect documentation/distribution drift instead of maintaining a loosely matching mockup. Keep native controls/accessibility and truthful persistence feedback. Consecutive experience grouping affects presentation only.
+
+
+Clean workspace 1.0 final native evidence — 2026-10-25: Final check passed (Ruff lint/format across 155 files, mypy 119 source files, 86 backend/26 frontend tests, ESLint, strict TypeScript, generated API drift and production build). Python/pnpm audits passed with no known vulnerabilities. Product e2e passed A/D/E/F, 6A–6F, structured experience and Phase 7 keyboard/responsive workflows with disposable SQLCipher, actual Chromium/PDF.js and synthetic model responses. The distributed reference browser passed 320/390/768/1280/1440px reflow, keyboard/draft/focus/control checks with zero page errors or remote requests. Eleven principal contrast pairs and exact CSS/manifest/documented-token synchronization passed; 94 local documentation links/assets were verified. Final isolated fresh-install passed production browser/PDF/ATS/outage/restart after correcting new test-only TypeScript fixture/query errors; the first failed run remains recorded in docs/design/07-ui-implementation.md. Desktop/editor/narrow/reference/forced-colors screenshots were reviewed. Canonical reusable specification: docs/design/UI_UX_STYLE_GUIDE.md; exact portable kit: docs/design/ui-starter/. All six ending documents maintained and original ending rules reread; blueprint preserved. No new follow-up dependencies/API contracts, personal-store operations, live inference, deployment, commits, remotes or publication. Successful disposable harness services/stores cleaned up by their own finally blocks. Earlier ignored failed-run stores and inherited security findings remain. Representative task/timing studies, actual 200% browser zoom, screen-reader interoperability, Docker/Nginx, hosted CI, clean OS, native Word and live Codex container login were not newly verified.
+
+
+## Application comment audit — 2026-10-26
+
+Document non-obvious intent at the implementation point, especially transaction/cancellation ownership and security limits. Avoid boilerplate comments on straightforward CRUD and preserve existing useful explanations. Verify against a pre-audit working-tree snapshot rather than HEAD because unrelated changes already exist. Do not broaden a comment audit into behavior/security remediation or generated-contract edits. Audit scope/index: docs/developer/COMMENT_AUDIT.md.
+
+
+## Git lock diagnosis — 2026-10-26
+
+Commit troubleshooting found a zero-byte .git/index.lock last modified October 25 at 12:41 p.m. local time, with no git/ssh/gpg process matching the read-only process check. This suggests an abandoned index lock; the originating operation is unknown and a process snapshot cannot exclude later activity. Guidance: finish/close Git operations, remove only the stale index.lock, then retry the commit. The lock was not removed; no staging, commit, remote, application/service/data/model changes or product tests occurred. All six ending documents maintained; original blueprint and prior verification limits preserved.
+

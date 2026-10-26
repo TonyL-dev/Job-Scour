@@ -30,6 +30,8 @@ class Gateway:
 
     @asynccontextmanager
     async def slot(self) -> AsyncIterator[None]:
+        # Count both waiters and the active call; the semaphore alone would allow
+        # an unbounded queue. The finally block covers cancellation while waiting.
         if self.pending >= 5:
             raise HTTPException(429, "AI queue full. Wait for a run to finish and retry.")
         self.pending += 1
@@ -51,6 +53,8 @@ class Gateway:
         self.endpoint_updates[endpoint.id] = endpoint
 
     def validated(self, endpoint: EndpointInput) -> EndpointInput:
+        # Callers may hold a configuration across awaits. Refuse stale settings
+        # before the next call; this cannot recall data already sent to a provider.
         if isinstance(endpoint, Endpoint) and endpoint.id in self.endpoint_updates:
             current = self.endpoint_updates[endpoint.id]
             if current != endpoint:

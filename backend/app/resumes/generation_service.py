@@ -56,6 +56,7 @@ def list_runs(db: Session, owner: UUID) -> list[GenerationRun]:
 
 
 def reorder_unlocked(items: list[Item], order: list[UUID]) -> list[Item]:
+    # Sort into unlocked slots only; protected items keep their exact positions.
     positions = {key: index for index, key in enumerate(order)}
     unlocked = iter(
         sorted((i for i in items if not i.locked), key=lambda i: positions.get(i.key, len(order)))
@@ -64,6 +65,8 @@ def reorder_unlocked(items: list[Item], order: list[UUID]) -> list[Item]:
 
 
 def item_budget(content: ResumeDocument) -> int:
+    # This bounds initial candidate work, not the final page count. Fitting later
+    # measures actual Chromium PDFs before removing or condensing unlocked content.
     from app.rendering.service import template_for
 
     template = template_for(content)
@@ -870,6 +873,8 @@ async def events(
     epoch: int | None = None,
 ) -> AsyncIterator[str]:
     last = after
+    # SSE only observes persisted progress. Disconnecting this reader leaves the
+    # worker running; sequence IDs allow a reconnect to skip already-seen events.
     while True:
         if barrier and epoch is not None and barrier.epoch != epoch:
             return

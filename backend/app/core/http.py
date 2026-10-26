@@ -41,6 +41,8 @@ class PrivateHTTP:
                 )
                 return
             body = bytearray()
+            # Content-Length may be absent or inaccurate; enforce the limit on actual
+            # chunks before handing any body to the application's JSON parser.
             while True:
                 message = await receive()
                 if message["type"] == "http.disconnect":

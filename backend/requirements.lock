@@ -4,7 +4,7 @@ annotated-types==0.8.0
 anyio==4.15.1
 boolean.py==5.0
 CacheControl==0.14.4
-certifi==2026.7.22
+certifi==2026.10.19
 cfgv==3.5.0
 charset-normalizer==3.5.2
 click==8.5.0
@@ -13,7 +13,7 @@ cyclonedx-python-lib==11.12.0
 defusedxml==0.7.1
 distlib==0.4.3
 fastapi==0.142.2
-filelock==4.0.12
+filelock==4.2.1
 greenlet==3.5.6
 h11==0.16.0
 httpcore==1.0.9
@@ -56,7 +56,7 @@ PyYAML==6.0.3
 requests==2.34.2
 rich==15.0.0
 ruff==0.16.10
-setuptools==84.0.0
+setuptools==84.1.0
 sortedcontainers==2.4.0
 SQLAlchemy==2.0.54
 starlette==1.7.0
@@ -67,11 +67,11 @@ typing_extensions==4.16.0
 tzdata==2026.5
 urllib3==2.8.0
 uvicorn==0.54.0
-virtualenv==21.14.5
+virtualenv==21.14.10
 wheel==0.48.0
 playwright==1.63.0
 pyee==13.0.1
-pypdf==6.19.0
+pypdf==6.21.2
 
 cffi==2.1.1
 cryptography==50.0.0

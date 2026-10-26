@@ -64,6 +64,8 @@ def answer(db: Session, owner: UUID, identifier: UUID, data: Answers) -> Profile
         if a.strip().casefold() not in {"", "skip", "unknown", "i don't know"}
     ]
     proposed = review.source.data.model_copy(deep=True)
+    # The model supplies questions only. User answers form the proposed evidence;
+    # saving this review does not update career facts until explicit confirmation.
     field = "text" if proposed.type == "achievement" else "description"
     setattr(
         proposed, field, getattr(proposed, field) + ("\n" + "\n".join(factual) if factual else "")

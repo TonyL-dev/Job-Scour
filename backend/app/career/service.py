@@ -150,5 +150,7 @@ def guard_records(session: Session, owner: UUID, records: list[CareerRecord]) ->
             parent = getattr(record.data, field, None)
             if parent is not None:
                 pending.append(get(session, owner, kind, parent))  # type: ignore[arg-type]
+    # Guard ancestors as well as cited rows. A stable lock order reduces deadlock
+    # risk when transactions share several sources in a different traversal order.
     for source_key in sorted(sources, key=lambda k: (k[0], str(k[1]))):
         repository.guard_active(session, owner, sources[source_key])

@@ -62,6 +62,8 @@ def save(
             .values(gold_standard=False)
         )
     if identifier:
+        # The service's earlier version check is advisory; this conditional write
+        # atomically reserves the next version against concurrent saves.
         result = session.execute(
             update(Resume)
             .where(
@@ -106,6 +108,8 @@ def save(
             restored_from_version_id=restored_from_version_id,
         )
     )
+    # Generation can include this snapshot and its run's saved-version link in one
+    # transaction. Flushing exposes IDs without committing the caller's other work.
     if commit:
         session.commit()
         session.refresh(row)

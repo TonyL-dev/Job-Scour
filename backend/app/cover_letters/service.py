@@ -198,6 +198,8 @@ def validate_content(
 
 def commit(db: Session, owner: UUID, identifier: UUID, data: LetterSave) -> LetterVersion:
     run = repository.get_run(db, owner, identifier)
+    # A retried acceptance returns the exact original version, even if the letter
+    # has since been edited. Never resolve this through the document's latest version.
     if run.saved_version_id:
         return repository.get_version(db, owner, run.saved_version_id)
     if run.status != "review" or run.revision != data.expected_revision:

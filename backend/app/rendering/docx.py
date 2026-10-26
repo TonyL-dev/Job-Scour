@@ -29,6 +29,8 @@ def paragraph(text: str, style: str = "Normal", bullet: bool = False) -> str:
 
 def export(document: ResumeDocument) -> bytes:
     custom = document.metadata.custom_template
+    # This exporter maps content/styles to OOXML rather than converting browser
+    # layout. Refuse custom markup/assets whose PDF appearance cannot be preserved.
     if custom and (custom.html != "{{header}}{{sections}}" or custom.css or custom.assets):
         raise HTTPException(
             422,

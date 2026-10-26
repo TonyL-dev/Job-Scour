@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clean workspace style — reference site</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="foundation.css">
+  <link rel="stylesheet" href="site.css">
+  <script src="ui.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header class="site-header page-width">
+    <a class="site-brand" href="#main-content">Your workspace.</a>
+    <nav aria-label="Reference navigation"><a href="#principles">Principles</a><a href="#workspace">Workspace</a><a href="#components">Components</a></nav>
+  </header>
+  <main id="main-content" tabindex="-1">
+    <section class="hero page-width">
+      <p class="eyebrow">CLEAN WORKSPACE STYLE · 1.0</p>
+      <h1>Make room for<br>what matters.</h1>
+      <p class="intro">A clear starting point for thoughtful websites. Calm surfaces, confident type, and a next step that's easy to find.</p>
+      <div class="actions"><a class="button button-primary" href="#workspace">Explore the workspace</a><a class="button button-secondary" href="../UI_UX_STYLE_GUIDE.md">Read the specification</a></div>
+      <p class="helper-text">A local reference example. No accounts, external assets or server requests.</p>
+    </section>
+
+    <section class="page-width section-space" id="principles" aria-labelledby="principles-title">
+      <header class="page-header"><div><p class="eyebrow">A SMALL SET OF CLEAR RULES</p><h2 id="principles-title">Less competing.<br>More considered.</h2></div></header>
+      <div class="two-column feature-grid">
+        <article class="panel feature-panel"><p class="eyebrow">HIERARCHY</p><h3>Let the important<br>things lead.</h3><p class="muted">One clear heading, a short explanation, and a focused set of actions. Details appear where they help.</p><a href="#components">Explore the controls <span aria-hidden="true">→</span></a></article>
+        <article class="panel feature-panel"><p class="eyebrow">SPACE</p><h3>Give every group<br>room to breathe.</h3><p class="muted">Keep related controls together. Use a larger gap when the task changes. Alignment does the organizing.</p><a href="#workspace">See a working layout <span aria-hidden="true">→</span></a></article>
+      </div>
+    </section>
+
+    <section class="page-width section-space" id="workspace" aria-labelledby="workspace-title">
+      <header class="page-header"><div><p class="eyebrow">APPLICATION EXAMPLE</p><h2 id="workspace-title">A focused place to work.</h2><p class="intro">The same visual system, adapted to a form and a preview.</p></div></header>
+      <div class="reference-workspace">
+        <div class="panel">
+          <div class="tabs" data-tabs>
+            <div role="tablist" aria-label="Example editor"><button type="button" role="tab" id="content-tab" aria-controls="content-panel" aria-selected="true">Content</button><button type="button" role="tab" id="appearance-tab" aria-controls="appearance-panel" aria-selected="false" tabindex="-1">Appearance</button></div>
+            <div role="tabpanel" id="content-panel" aria-labelledby="content-tab">
+              <h3>Project details</h3>
+              <form data-demo-form>
+                <label for="project-title">Project name<input id="project-title" name="title" required value="A thoughtful new project" aria-describedby="title-hint"></label>
+                <p id="title-hint" class="helper-text">Choose a name you will recognize later.</p>
+                <label for="project-summary">Short description<textarea id="project-summary" name="summary">A useful tool, designed around the people who use it.</textarea></label>
+                <label class="check"><input type="checkbox" checked>Keep this project private</label>
+                <div class="actions form-footer"><button class="button button-primary" type="submit">Save changes</button><button class="button button-ghost" type="reset">Reset example</button></div>
+                <p role="status" data-save-status class="helper-text">Changes in this example stay in the page only.</p>
+              </form>
+            </div>
+            <div role="tabpanel" id="appearance-panel" aria-labelledby="appearance-tab" hidden>
+              <h3>Appearance</h3><p class="muted">Switch back to Content: your draft is still there. These panels remain mounted.</p>
+              <label for="example-layout">Layout<select id="example-layout"><option>Comfortable</option><option>Reading focused</option></select></label>
+              <p class="helper-text">This selector demonstrates field appearance only.</p>
+            </div>
+          </div>
+        </div>
+        <aside class="reference-preview" aria-label="Document preview example">
+          <div class="toolbar"><h3>Preview</h3><span class="pill">Example</span></div>
+          <article class="reference-paper"><p class="eyebrow">YOUR PROJECT</p><h3>A little more clarity.</h3><p>A little less friction.</p><hr class="divider"><p class="muted">Build the experience around a clear goal. Use honest labels, consistent spacing, and a layout that helps people focus.</p></article>
+        </aside>
+      </div>
+    </section>
+
+    <section class="page-width section-space" id="components" aria-labelledby="components-title">
+      <header class="page-header"><div><p class="eyebrow">THE COMPONENT LANGUAGE</p><h2 id="components-title">Consistent in every state.</h2></div></header>
+      <div class="panel">
+        <h3>Actions</h3><p class="muted">Filled for the next commitment. Outlined for a supporting action. Text for a utility.</p>
+        <div class="actions"><a class="button button-primary" href="#workspace">Start a project</a><a class="button button-secondary" href="#principles">Learn the principles</a><a class="button button-ghost" href="#reference-notes">View notes <span aria-hidden="true">→</span></a></div>
+        <div class="actions"><button type="button" disabled>Unavailable</button><button class="button button-primary" type="button" disabled aria-busy="true">Saving…</button></div>
+        <hr class="divider">
+        <h3>Clear feedback</h3><p class="status-notice" role="status">Your changes have been saved.</p><p class="warning">Review these details before continuing.</p>
+        <label for="example-email">Email address<input id="example-email" type="email" value="an-incomplete-address" aria-invalid="true" aria-describedby="example-email-error"></label><p class="field-error" id="example-email-error">Enter an address such as name@example.com.</p>
+        <details class="disclosure"><summary>More details, when you need them</summary><div class="disclosure-content"><p>Disclosure content stays in the reading flow and is reachable by keyboard. Keep essential warnings and the primary action visible.</p></div></details>
+      </div>
+      <div class="panel"><h3>A quiet data view</h3><div class="table-scroll" role="region" aria-label="Example projects" tabindex="0"><table><thead><tr><th scope="col">Project</th><th scope="col">Status</th><th scope="col">Next step</th></tr></thead><tbody><tr><td>Workspace concept</td><td>In progress</td><td>Review content</td></tr><tr><td>Design reference</td><td>Ready</td><td>Check accessibility</td></tr></tbody></table></div></div>
+    </section>
+  </main>
+  <footer id="reference-notes" class="site-footer page-width"><p>Clean workspace style 1.0.0. The tokens and foundation CSS are shared with the application.</p><p><a href="../UI_UX_STYLE_GUIDE.md">Style specification</a> · <a href="../apple-website-ui-analysis.md">Research and interpretation</a></p></footer>
+</body>
+</html>

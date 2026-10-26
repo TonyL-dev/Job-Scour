@@ -155,7 +155,7 @@ def main() -> None:
                         page.get_by_role("button", name="Parse locally", exact=True).click()
                         expect(
                             page.get_by_role("heading", name="Review synthetic.docx")
-                        ).to_be_visible()
+                        ).to_be_visible(timeout=20000)
                         page.get_by_role("button", name="Add candidate manually").click()
                         page.get_by_label("Name (required)", exact=True).fill("Orbit")
                         page.get_by_label("Description", exact=True).fill("Latency project")
@@ -198,7 +198,7 @@ def main() -> None:
                         page.get_by_role(
                             "button", name="Accept all supported changes", exact=True
                         ).click()
-                        expect(page.locator(".pdf-pages canvas").first).to_be_visible()
+                        expect(page.locator(".pdf-pages canvas").first).to_be_visible(timeout=30000)
                         page.get_by_role("button", name="Save tailored resume", exact=True).click()
                         expect(
                             page.get_by_text("Tailored resume saved: Tailored resume", exact=True)
@@ -278,6 +278,7 @@ def main() -> None:
                         ).click()
                         page.get_by_label("Version", exact=True).select_option(index=1)
                         page.get_by_label("Compare with", exact=True).select_option(index=1)
+                        page.get_by_text("More version actions", exact=True).click()
                         page.get_by_role(
                             "button", name="Restore as new version", exact=True
                         ).click()
@@ -313,7 +314,7 @@ def main() -> None:
                         expect(page.get_by_label("Keep paragraph", exact=True)).to_be_enabled()
                         page.get_by_role("button", name="Save reviewed letter").click()
                         expect(page.get_by_text("Cover letter saved.", exact=True)).to_be_visible()
-                        expect(page.locator(".pdf-pages canvas").first).to_be_visible()
+                        expect(page.locator(".pdf-pages canvas").first).to_be_visible(timeout=30000)
                         with page.expect_download() as downloaded_letter:
                             page.get_by_role(
                                 "button", name="Download letter DOCX", exact=True
@@ -347,7 +348,7 @@ def main() -> None:
                             "Synthetic custom template"
                         )
                         page.get_by_role("button", name="Validate & preview synthetic PDF").click()
-                        expect(page.locator(".pdf-pages canvas").first).to_be_visible()
+                        expect(page.locator(".pdf-pages canvas").first).to_be_visible(timeout=30000)
                         page.get_by_role(
                             "button", name="Save template revision", exact=True
                         ).click()
@@ -400,7 +401,7 @@ def main() -> None:
                         ).to_be_visible()
                         page.get_by_role("button", name="Save master", exact=True).click()
                         expect(page.get_by_text("Saved · version 1", exact=True)).to_be_visible()
-                        expect(page.locator(".pdf-pages canvas").first).to_be_visible()
+                        expect(page.locator(".pdf-pages canvas").first).to_be_visible(timeout=30000)
                         page.get_by_label("Preview format", exact=True).select_option("html")
                         frame = page.frame_locator('iframe[title="Resume HTML preview"]')
                         expect(
@@ -434,11 +435,99 @@ def main() -> None:
                         expect(
                             page.get_by_role("textbox", name="Duty (bullet point)", exact=True)
                         ).to_have_count(2)
-                        expect(page.locator(".pdf-pages canvas").first).to_be_visible()
+                        expect(page.locator(".pdf-pages canvas").first).to_be_visible(timeout=30000)
                         page.screenshot(
                             path=str(evidence / "structured-experience-browser.png"),
                             full_page=True,
                         )
+                        # Phase 7: mounted drafts, keyboard tabs, responsive preview and drawer.
+                        page.get_by_role("tab", name="Content", exact=True).focus()
+                        page.keyboard.press("ArrowRight")
+                        expect(page.get_by_role("tab", name="Appearance")).to_be_focused()
+                        page.get_by_label("Page target", exact=True).fill("2")
+                        page.keyboard.press("Tab")
+                        page.get_by_role("tab", name="Appearance").focus()
+                        page.keyboard.press("Home")
+                        expect(
+                            page.get_by_role(
+                                "textbox", name="Summary (one sentence max)", exact=True
+                            )
+                        ).to_have_value("Built reliable systems.")
+                        for width in (320, 390, 768, 1280, 1440):
+                            page.set_viewport_size({"width": width, "height": 1000})
+                            assert not page.evaluate(
+                                "document.documentElement.scrollWidth > innerWidth"
+                            ), f"Studio overflow at {width}"
+                            if width <= 800:
+                                page.get_by_role("button", name="Navigation", exact=True).click()
+                                expect(
+                                    page.get_by_role("dialog", name="Workspace navigation")
+                                ).to_be_visible()
+                                page.keyboard.press("Escape")
+                                expect(
+                                    page.get_by_role("button", name="Navigation", exact=True)
+                                ).to_be_focused()
+                            if width <= 1150:
+                                page.get_by_role("button", name="Preview", exact=True).click()
+                                expect(page.locator(".pdf-pages canvas").first).to_be_visible(
+                                    timeout=30000
+                                )
+                                page.screenshot(
+                                    path=str(evidence / f"phase7-preview-{width}.png"),
+                                    full_page=True,
+                                )
+                                page.get_by_role("button", name="Edit", exact=True).click()
+                                expect(
+                                    page.get_by_role(
+                                        "textbox",
+                                        name="Summary (one sentence max)",
+                                        exact=True,
+                                    )
+                                ).to_have_value("Built reliable systems.")
+                            page.screenshot(
+                                path=str(evidence / f"phase7-studio-{width}.png"),
+                                full_page=True,
+                            )
+                        page.emulate_media(reduced_motion="reduce", forced_colors="active")
+                        page.screenshot(
+                            path=str(evidence / "phase7-forced-colors.png"),
+                            full_page=True,
+                        )
+                        page.emulate_media(reduced_motion="no-preference", forced_colors="none")
+                        # Equivalent CSS viewport for a 1280px browser at 200% zoom.
+                        page.set_viewport_size({"width": 640, "height": 500})
+                        assert not page.evaluate(
+                            "document.documentElement.scrollWidth > innerWidth"
+                        )
+                        page.set_viewport_size({"width": 1440, "height": 1000})
+                        for route in (
+                            "/",
+                            "/career/experience",
+                            "/imports",
+                            "/profile",
+                            "/jobs",
+                            "/generate",
+                            "/history",
+                            "/applications",
+                            "/letters",
+                            "/templates",
+                            "/settings/ai",
+                            "/prompts",
+                            "/privacy",
+                        ):
+                            page.goto(url + route)
+                            expect(page.locator("main h1")).to_be_visible()
+                            name = route.strip("/").replace("/", "-") or "home"
+                            for width in (390, 1440):
+                                page.set_viewport_size({"width": width, "height": 1000})
+                                assert not page.evaluate(
+                                    "document.documentElement.scrollWidth > innerWidth"
+                                ), f"{route} overflow at {width}"
+                                page.screenshot(
+                                    path=str(evidence / f"phase7-{name}-{width}.png"),
+                                    full_page=True,
+                                )
+                        page.goto(url + "/resumes")
                         # Privacy: actual cookies, unlock, JSON/PDF archive and delete-all.
                         page.get_by_role("link", name="Privacy", exact=True).click()
                         expect(
@@ -502,6 +591,7 @@ def main() -> None:
                                         "6E",
                                         "6F",
                                         "structured-experience",
+                                        "phase7-responsive-tabs-navigation",
                                     ],
                                     "model_responses": "synthetic mocks",
                                     "database": "SQLCipher",

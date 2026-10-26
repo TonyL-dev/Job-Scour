@@ -6,6 +6,10 @@ A local-first career and resume workspace with sourced generation/review, actual
 
 Start with the [developer handbook](docs/developer/README.md) for the current architecture, repository map, design principles and traced workflows. Read the detailed [backend](docs/developer/BACKEND.md) and [frontend](docs/developer/FRONTEND.md) guides for code organization, contracts, state, transactions, concurrency, privacy, testing and feature-change recipes. The [new-project architecture template](docs/developer/PROJECT_ARCHITECTURE_TEMPLATE.md) works alongside the reusable coding-practice guides to document future projects. The handbook distinguishes implemented code, historical plans, recommended patterns and known limitations.
 
+## UI/UX style and reuse
+
+The [UI/UX style specification](docs/design/UI_UX_STYLE_GUIDE.md) documents the implemented Apple-inspired typography, colors, spacing, components, layouts and interaction rules. Use the [copyable reference site](docs/design/ui-starter/index.html) to reproduce the style in another project; its token and foundation CSS are synchronized with the app. The [clean UI process](docs/coding-practices/CLEAN_UI_DESIGN_PROCESS.md) explains the design workflow.
+
 ## Choose an installation
 
 For reusable standards to copy into future projects, see the [frontend and backend coding practice guides](docs/coding-practices/README.md). They cover architecture, naming, implementation patterns, security, testing and new-project adoption checklists.

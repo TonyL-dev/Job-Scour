@@ -119,6 +119,8 @@ def activate(db: Session, owner: UUID, data: Activation) -> dict[str, UUID]:
     verifier = settings.resolve(db, owner, "verification")
     if custom.task != data.task or custom.base_digest != base_digest(data.task):
         raise HTTPException(422, "Prompt task/base mismatch")
+    # A passing report is valid only for this candidate and current writer/verifier
+    # configuration; changing models/settings requires a new evaluation.
     if (
         report.prompt_id != custom.id
         or not report.passed

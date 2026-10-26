@@ -33,3 +33,9 @@ Preserve ownership, authorization, concurrency and privacy boundaries.
 **Must** marks an adopted requirement. **Default** marks the preferred starting choice, which can be changed with a recorded reason. **Conditional** practices apply only when the feature or deployment requires them. None of these documents requires adding optional features, frameworks or infrastructure to an otherwise small project.
 
 For this repository, existing instructions take precedence. Its runtime requirements remain Python 3.12+, Node 24.x and pnpm 11.19.0. No runtime refactoring, dependency changes or deployment are part of creating these guides. The known automatic-session-expiry revocation issue and renderer/parser containment gaps remain unresolved; see the [security audit](../release/security-audit-2026-10-09.md).
+
+## Clean UI design
+
+[UI/UX style specification](../design/UI_UX_STYLE_GUIDE.md) is the detailed, implementation-aligned visual contract. Copy its [HTML/CSS/JS starter](../design/ui-starter/index.html) into future projects to reproduce the style. [Clean UI design process](CLEAN_UI_DESIGN_PROCESS.md) explains the general workflow. The [Phase 7 plan](../design/07-ui-refinement-plan.md) is retained as planning history; current code and evidence are documented separately.
+
+The [Apple website analysis](../design/apple-website-ui-analysis.md) records measured examples and explains their adaptation. [UI component guidance](../developer/UI_COMPONENTS.md) describes the current implementation; release validation is tracked separately.

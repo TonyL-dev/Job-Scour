@@ -215,3 +215,35 @@ Inspected the actual native resume editor in the in-app browser. The structured 
 ## Backend learning companion — 2026-10-22
 
 Use docs/developer/BACKEND_READING_LIST.md when learning or explaining BACKEND.md. The list preserves sections 1-14 and offers a dependency-aware study order. No new skill/plugin or external research was needed; this is a local documentation companion.
+
+
+## UI refinement planning — 2026-10-22
+
+Use docs/coding-practices/CLEAN_UI_DESIGN_PROCESS.md as a copyable future-project method: brief, audit, workflow hierarchy, wireframes, tokens, stateful components, one complete slice, usability/accessibility verification and maintained evidence. It is ordinary Markdown, not an installed Codex skill. Separate source findings from screenshot observations, use synthetic data, and distinguish project heuristics from Apple/WCAG requirements.
+
+
+## Phase 7 implementation and Apple UI analysis — 2026-10-25
+
+Apple website inspection method: inspect public pages visually, measure visible DOM/computed styles, read responsive production CSS, and label observation versus inference versus proposed application values. The report docs/design/apple-website-ui-analysis.md and reusable CLEAN_UI_DESIGN_PROCESS.md support future projects. UI component guidance is docs/developer/UI_COMPONENTS.md. No installed design skill or remote assets were added. Keep release evidence and real participant usability results separate.
+
+
+Phase 7 final native evidence — 2026-10-25: For Python audit/install on this host, the inherited PostgreSQL CA path can be invalid; process-local certifi CA variables retain TLS verification without persistent environment mutation. Run Ruff for scripts with backend/pyproject.toml settings. Async browser assertions need to account for documented parser/render bounds; do not treat Playwright default assertion timing as the service contract. Actual final native check/audit/e2e/fresh-install passed; retain all unsuccessful runs and external acceptance limits. Recursive cleanup of two owned disposable failed-run folders was rejected by automatic review and was not bypassed.
+
+
+## Apple-inspired UI and reusable style specification — 2026-10-25
+
+For another website, copy docs/design/ui-starter with UI_UX_STYLE_GUIDE.md, complete the product brief and use the included implementation prompt. It is a local reference kit and ordinary documentation, not a newly installed Codex skill/plugin. scripts/ui_style.py sync refreshes CSS copies, manifest and generated token block; check detects drift/contrast; browser exercises only a temporary loopback reference server. Keep local demonstration saving separate from real production persistence.
+
+
+Clean workspace 1.0 final native evidence — 2026-10-25: Final check passed (Ruff lint/format across 155 files, mypy 119 source files, 86 backend/26 frontend tests, ESLint, strict TypeScript, generated API drift and production build). Python/pnpm audits passed with no known vulnerabilities. Product e2e passed A/D/E/F, 6A–6F, structured experience and Phase 7 keyboard/responsive workflows with disposable SQLCipher, actual Chromium/PDF.js and synthetic model responses. The distributed reference browser passed 320/390/768/1280/1440px reflow, keyboard/draft/focus/control checks with zero page errors or remote requests. Eleven principal contrast pairs and exact CSS/manifest/documented-token synchronization passed; 94 local documentation links/assets were verified. Final isolated fresh-install passed production browser/PDF/ATS/outage/restart after correcting new test-only TypeScript fixture/query errors; the first failed run remains recorded in docs/design/07-ui-implementation.md. Desktop/editor/narrow/reference/forced-colors screenshots were reviewed. Canonical reusable specification: docs/design/UI_UX_STYLE_GUIDE.md; exact portable kit: docs/design/ui-starter/. All six ending documents maintained and original ending rules reread; blueprint preserved. No new follow-up dependencies/API contracts, personal-store operations, live inference, deployment, commits, remotes or publication. Successful disposable harness services/stores cleaned up by their own finally blocks. Earlier ignored failed-run stores and inherited security findings remain. Representative task/timing studies, actual 200% browser zoom, screen-reader interoperability, Docker/Nginx, hosted CI, clean OS, native Word and live Codex container login were not newly verified.
+
+
+## Application comment audit — 2026-10-26
+
+Used local source inspection, targeted inline comments, Python AST/non-comment-token comparison and TypeScript transpilation with comments removed to verify executable equivalence against the pre-audit working tree. No external research, new skill/plugin, dependency, test fixture or model call was needed. Keep comments about constraints and reasons, not restatements of syntax; record known limits candidly. See docs/developer/COMMENT_AUDIT.md.
+
+
+## Git lock diagnosis — 2026-10-26
+
+Commit troubleshooting found a zero-byte .git/index.lock last modified October 25 at 12:41 p.m. local time, with no git/ssh/gpg process matching the read-only process check. This suggests an abandoned index lock; the originating operation is unknown and a process snapshot cannot exclude later activity. Guidance: finish/close Git operations, remove only the stale index.lock, then retry the commit. The lock was not removed; no staging, commit, remote, application/service/data/model changes or product tests occurred. All six ending documents maintained; original blueprint and prior verification limits preserved.
+

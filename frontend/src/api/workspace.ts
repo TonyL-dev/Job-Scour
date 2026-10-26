@@ -68,6 +68,8 @@ export async function getResumes() {
 }
 
 export async function saveResume(title: string, content: Document, gold_standard: boolean, saved?: MasterResume, autosave = false) {
+  // Both explicit save and autosave use the last acknowledged version; the backend
+  // rejects stale writes instead of silently overwriting another editor's changes.
   const body = { title, content, gold_standard, autosave, expected_version: saved?.version_number ?? 0 }
   const r = saved ? await api.PUT('/api/resumes/{identifier}', { params: { path: { identifier: saved.id } }, body }) : await api.POST('/api/resumes', { body })
   if (!r.data) throw failure(r.error, r.response.status)

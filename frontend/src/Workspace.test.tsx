@@ -38,6 +38,24 @@ describe('career library', () => {
 })
 
 describe('master resume studio', () => {
+  it('groups sourced experience text without merging items and edits facts beside that group', async () => {
+    const user = userEvent.setup()
+    const experience: workspace.CareerRecord = { id: 'source', created_at: '', updated_at: '', deleted_at: null, data: { type: 'experience', company: 'Example', job_title: 'Engineer', start_date: '2020-01-01', current: true, employment_type: 'full_time', description: '', ordering_hint: 0 } }
+    const facts = { employer: 'Example', title: 'Engineer', start_date: '2020-01-01', current: true }
+    const content: workspace.Document = { schema_version: 1, header: { name: 'Ada' }, metadata: { template_id: '00000000-0000-4000-8000-000000000101', target_page_limit: 2 }, sections: [{ key: 'experience', type: 'experience', title: 'Experience', visible: true, locked: false, items: ['Built reliable systems.', 'Maintained APIs', 'Reviewed changes'].map((text, index) => ({ key: `item-${index}`, text, origin: 'user', locked: false, experience_summary: index === 0, source_refs: [{ entity_type: 'experience', entity_id: 'source' }], facts })) }] }
+    vi.mocked(workspace.getHistory).mockResolvedValue([experience])
+    vi.mocked(workspace.getResumes).mockResolvedValue([{ id: 'grouped', title: 'Grouped master', kind: 'master', gold_standard: false, version_number: 1, updated_at: '', content }])
+    renderPage('/resumes?resume=grouped')
+    expect(await screen.findAllByRole('heading', { name: 'Engineer · Example' })).toHaveLength(1)
+    expect(screen.getAllByRole('checkbox', { name: 'Protect item' })).toHaveLength(3)
+    const first = document.getElementById('item-item-0')!
+    await user.click(within(first).getByRole('button', { name: 'Edit details: Engineer · Example' }))
+    expect(within(first).getByRole('form', { name: 'Edit experience details' })).toBeInTheDocument()
+    await user.click(within(first).getByRole('button', { name: 'Cancel' }))
+    expect(screen.getByRole('textbox', { name: 'Summary (one sentence max)' })).toHaveValue('Built reliable systems.')
+    expect(screen.getAllByRole('textbox', { name: 'Duty (bullet point)' }).map(input => (input as HTMLTextAreaElement).value)).toEqual(['Maintained APIs', 'Reviewed changes'])
+  })
+
   it('adds structured experience facts, a summary and separate duty bullets', async () => {
     const user = userEvent.setup()
     vi.mocked(workspace.saveCareer).mockImplementation(async data => ({ id: 'experience-id', data, created_at: '', updated_at: '', deleted_at: null }))

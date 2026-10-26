@@ -100,6 +100,8 @@ def cached(digest: str) -> Rendered | None:
 
 def retain(digest: str, result: Rendered, epoch: int) -> None:
     with CACHE_LOCK:
+        # A render may finish after lock/delete cleared the cache. Its captured
+        # epoch prevents that late result from restoring private cached content.
         if epoch != cache_epoch:
             return
         size = len(result.html.encode()) + len(result.pdf)
@@ -181,6 +183,8 @@ def html(document: ResumeDocument) -> str:
         if not section.visible:
             continue
         parts.append(f"<section><h2>{escape(section.title)}</h2>")
+        # Group only adjacent equal headings; global deduplication would hide a
+        # heading when an experience reappears after a different fact group.
         previous_facts = None
         for item in section.items:
             parts.append("<article>")
@@ -240,6 +244,7 @@ def render(document: ResumeDocument) -> Rendered:
     if not RENDER_LIMIT.acquire(timeout=5):
         raise RendererBusy("PDF renderer is busy. Retry shortly.")
     try:
+        # Another render may have filled the cache while this call waited for a slot.
         if result := cached(digest):
             return result
         result = print_artifact(artifact, digest)

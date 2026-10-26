@@ -43,6 +43,8 @@ class LockState:
         self.retry_at = 0.0
 
     def unlocked(self, token: str | None) -> bool:
+        # Expiry removes tokens/cache only; it does not run lock_workspace's epoch
+        # revocation. The held-stream/transaction gap is tracked in the 2026-10-09 audit.
         expired = [t for t, expiry in self.sessions.items() if expiry <= time.monotonic()]
         if expired:
             for t in expired:
@@ -176,6 +178,8 @@ async def delete_workspace(
     runtime.deleting = True
     clear_cache()
     epoch = runtime.barrier.invalidate()
+    # Only the deletion transaction joins the new epoch. Older bound sessions are
+    # revoked before awaiting cancellation, so they cannot repopulate deleted data.
     bind(db, runtime.barrier, epoch)
     try:
         from app.ai.operations import cancel_all as cancel_operations

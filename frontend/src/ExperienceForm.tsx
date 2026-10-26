@@ -1,5 +1,6 @@
+import { ActionGroup, Button } from './components/ui/Controls'
 import { useMutation } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { saveCareer } from './api/workspace'
 import type { CareerRecord, Item } from './api/workspace'
 import { summaryError } from './experience'
@@ -9,6 +10,7 @@ export function ExperienceForm({ record, onSaved, onCancel }: {
   onSaved: (record: CareerRecord, items?: Item[]) => void
   onCancel: () => void
 }) {
+  const validationId = useId()
   const original = record?.data.type === 'experience' ? record.data : undefined
   const [company, setCompany] = useState(original?.company ?? '')
   const [title, setTitle] = useState(original?.job_title ?? '')
@@ -22,6 +24,8 @@ export function ExperienceForm({ record, onSaved, onCancel }: {
   const complete = company.trim() && title.trim() && start && (current || end) && !invalidDates && (original || ((!invalidSummary) && (summary.trim() || duties.some(d => d.trim()))))
   const save = useMutation({ mutationFn: async () => {
     const texts = [summary.trim(), ...duties.map(d => d.trim())].filter(Boolean)
+    // Persist evidence before building sourced draft items. The later resume save
+    // is separate, so discarding the draft does not undo this career-library write.
     const saved = await saveCareer({
       ...original, type: 'experience', company: company.trim(), job_title: title.trim(),
       employment_type: original?.employment_type ?? 'full_time', ordering_hint: original?.ordering_hint ?? 0,
@@ -42,22 +46,22 @@ export function ExperienceForm({ record, onSaved, onCancel }: {
       <div className="form-grid">
         <label>Company *<input required value={company} onChange={e => setCompany(e.target.value)} /></label>
         <label>Title *<input required value={title} onChange={e => setTitle(e.target.value)} /></label>
-        <label>Start date *<input type="date" required value={start} onChange={e => setStart(e.target.value)} /></label>
-        <label>End date<input type="date" required={!current} disabled={current} min={start || undefined} value={current ? '' : end} onChange={e => setEnd(e.target.value)} /></label>
+        <label>Start date *<input type="date" required aria-invalid={invalidDates} aria-describedby={invalidDates ? `${validationId}-dates` : undefined} value={start} onChange={e => setStart(e.target.value)} /></label>
+        <label>End date<input type="date" aria-invalid={invalidDates} aria-describedby={invalidDates ? `${validationId}-dates` : undefined} required={!current} disabled={current} min={start || undefined} value={current ? '' : end} onChange={e => setEnd(e.target.value)} /></label>
       </div>
       <label className="check"><input type="checkbox" checked={current} onChange={e => setCurrent(e.target.checked)} />Present</label>
-      {invalidDates && <p role="alert">End date must not precede start date.</p>}
+      {invalidDates && <p id={`${validationId}-dates`} role="alert">End date must not precede start date.</p>}
       {!original && <>
-        <label>Summary (one sentence max)<textarea maxLength={500} value={summary} aria-invalid={invalidSummary} onChange={e => setSummary(e.target.value)} /></label>
-        {invalidSummary && <p role="alert">Use one sentence on one line, at most 500 characters. Avoid periods in abbreviations.</p>}
+        <label>Summary (one sentence max)<textarea maxLength={500} value={summary} aria-invalid={invalidSummary} aria-describedby={invalidSummary ? `${validationId}-summary` : undefined} onChange={e => setSummary(e.target.value)} /></label>
+        {invalidSummary && <p id={`${validationId}-summary`} role="alert">Use one sentence on one line, at most 500 characters. Avoid periods in abbreviations.</p>}
         <p>Duties (one bullet per field)</p>
-        {duties.map((duty, index) => <div key={index}>
+        {duties.map((duty, index) => <div className="duty-field" key={index}>
           <label>Duty {index + 1}<textarea maxLength={20000} value={duty} onChange={e => setDuties(duties.map((d, i) => i === index ? e.target.value : d))} /></label>
-          <button type="button" className="secondary" onClick={() => setDuties(duties.filter((_, i) => i !== index))}>Remove duty {index + 1}</button>
+          <Button type="button" variant="ghost" onClick={() => setDuties(duties.filter((_, i) => i !== index))}>Remove duty {index + 1}</Button>
         </div>)}
-        <button type="button" className="secondary" onClick={() => setDuties([...duties, ''])}>Add duty</button>
+        <Button type="button" variant="secondary" onClick={() => setDuties([...duties, ''])}>Add duty</Button>
       </>}
-      <div className="actions"><button disabled={!complete}>{original ? 'Save experience details' : 'Add experience to draft'}</button><button type="button" className="secondary" onClick={onCancel}>Cancel</button></div>
+      <ActionGroup className="form-footer"><Button variant="primary" disabled={!complete} aria-busy={save.isPending}>{save.isPending ? 'Saving experience…' : original ? 'Save experience details' : 'Add experience to draft'}</Button><Button type="button" variant="secondary" onClick={onCancel}>Cancel</Button></ActionGroup>
     </fieldset>
     {save.error && <p role="alert">{save.error.message}</p>}
   </form>
