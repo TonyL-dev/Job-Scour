@@ -5,11 +5,18 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
 from fastapi import HTTPException
+
+# Mypy narrows platform-specific APIs in statements, not conditional expressions.
+if sys.platform == "win32":
+    NO_WINDOW = subprocess.CREATE_NO_WINDOW
+else:
+    NO_WINDOW = 0
 
 
 def executable() -> str:
@@ -44,7 +51,7 @@ def environment() -> dict[str, str]:
 async def stop(process: asyncio.subprocess.Process) -> None:
     if process.returncode is not None:
         return
-    if os.name == "nt":
+    if sys.platform == "win32":
         killer = await asyncio.create_subprocess_exec(
             "taskkill.exe",
             "/PID",
@@ -53,7 +60,7 @@ async def stop(process: asyncio.subprocess.Process) -> None:
             "/F",
             stdout=asyncio.subprocess.DEVNULL,
             stderr=asyncio.subprocess.DEVNULL,
-            creationflags=subprocess.CREATE_NO_WINDOW,
+            creationflags=NO_WINDOW,
         )
         await killer.wait()
     else:
@@ -78,8 +85,8 @@ async def run(args: list[str], cwd: str, prompt: str = "", timeout: float = 240)
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             **(
-                {"creationflags": subprocess.CREATE_NO_WINDOW}
-                if os.name == "nt"
+                {"creationflags": NO_WINDOW}
+                if sys.platform == "win32"
                 else {"start_new_session": True}
             ),
         )

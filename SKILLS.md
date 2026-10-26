@@ -247,3 +247,8 @@ Used local source inspection, targeted inline comments, Python AST/non-comment-t
 
 Commit troubleshooting found a zero-byte .git/index.lock last modified October 25 at 12:41 p.m. local time, with no git/ssh/gpg process matching the read-only process check. This suggests an abandoned index lock; the originating operation is unknown and a process snapshot cannot exclude later activity. Guidance: finish/close Git operations, remove only the stale index.lock, then retry the commit. The lock was not removed; no staging, commit, remote, application/service/data/model changes or product tests occurred. All six ending documents maintained; original blueprint and prior verification limits preserved.
 
+
+
+## Cross-platform CI typing fix - 2026-10-26
+
+For platform-specific Python APIs, use sys.platform statement guards; mypy still checked CREATE_NO_WINDOW inside conditional expressions in this repository. Reproduce Linux typing locally with backend/.venv/Scripts/python.exe -m mypy --platform linux from backend. python scripts/tasks.py check now covers both linux and win32 stubs. This is static cross-platform validation, not an Ubuntu runtime or hosted CI result. No specialized skill/plugin was needed.

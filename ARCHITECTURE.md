@@ -284,3 +284,8 @@ Comment-only clarification records the existing service/repository transaction c
 
 Commit troubleshooting found a zero-byte .git/index.lock last modified October 25 at 12:41 p.m. local time, with no git/ssh/gpg process matching the read-only process check. This suggests an abandoned index lock; the originating operation is unknown and a process snapshot cannot exclude later activity. Guidance: finish/close Git operations, remove only the stale index.lock, then retry the commit. The lock was not removed; no staging, commit, remote, application/service/data/model changes or product tests occurred. All six ending documents maintained; original blueprint and prior verification limits preserved.
 
+
+
+## Cross-platform CI typing fix - 2026-10-26
+
+Codex and import-parser modules resolve CREATE_NO_WINDOW behind explicit sys.platform == "win32" statement guards, with zero flags elsewhere. Existing Windows hidden launches and POSIX session/cancellation behavior remain intact. The shared check runner validates backend types against both Linux and Windows stubs, independent of its host. No API/storage/domain boundary changes.

@@ -144,7 +144,9 @@ def main() -> None:
             "../scripts",
             cwd=BACKEND,
         )
-        run(str(PYTHON), "-m", "mypy", cwd=BACKEND)
+        # Check both platform stubs so native success cannot hide CI-only type errors.
+        for platform in ("linux", "win32"):
+            run(str(PYTHON), "-m", "mypy", "--platform", platform, cwd=BACKEND)
         run(str(PYTHON), "-m", "pytest", "-q", cwd=BACKEND)
         api(check=True)
         for command in ["lint", "typecheck", "test", "build"]:

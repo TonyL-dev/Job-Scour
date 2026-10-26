@@ -24,6 +24,12 @@ from app.importers import repository
 from app.importers.schemas import Candidate, Fragment, ImportRun, Review, Upload
 from app.settings import service as settings
 
+# Resolve the Windows-only constant inside a platform guard understood by mypy.
+if sys.platform == "win32":
+    NO_WINDOW = subprocess.CREATE_NO_WINDOW
+else:
+    NO_WINDOW = 0
+
 ADMISSION = BoundedSemaphore(2)
 ADAPTER: TypeAdapter[CareerInput] = TypeAdapter(CareerInput)
 ACTIVE: dict[tuple[UUID, UUID], asyncio.Task[object]] = {}
@@ -104,7 +110,7 @@ def parse(
                 stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL,
                 env=child_env,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=NO_WINDOW,
             )
             PARSERS[token] = process
             if token in CANCELLED:

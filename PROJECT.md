@@ -1770,3 +1770,8 @@ User requested a comment audit of the application. Added 80 explanatory comment 
 
 Commit troubleshooting found a zero-byte .git/index.lock last modified October 25 at 12:41 p.m. local time, with no git/ssh/gpg process matching the read-only process check. This suggests an abandoned index lock; the originating operation is unknown and a process snapshot cannot exclude later activity. Guidance: finish/close Git operations, remove only the stale index.lock, then retry the commit. The lock was not removed; no staging, commit, remote, application/service/data/model changes or product tests occurred. All six ending documents maintained; original blueprint and prior verification limits preserved.
 
+
+
+## Cross-platform CI typing fix - 2026-10-26
+
+User reported Ubuntu CI failing on three Windows-only CREATE_NO_WINDOW references. Reproduced the exact three errors locally using Linux-targeted mypy, added recognized statement guards in the Codex/import-parser modules and both-platform typing to the ordinary check runner. Original blueprint and prior environment/security limits are preserved. No API/dependency/personal-store/service/model/commit/remote/publication changes. Validation evidence is recorded in IMPLEMENTATION_STATUS.md.
