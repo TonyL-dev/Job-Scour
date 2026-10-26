@@ -289,3 +289,8 @@ Commit troubleshooting found a zero-byte .git/index.lock last modified October 2
 ## Cross-platform CI typing fix - 2026-10-26
 
 Codex and import-parser modules resolve CREATE_NO_WINDOW behind explicit sys.platform == "win32" statement guards, with zero flags elsewhere. Existing Windows hidden launches and POSIX session/cancellation behavior remain intact. The shared check runner validates backend types against both Linux and Windows stubs, independent of its host. No API/storage/domain boundary changes.
+
+
+## Generic README folder examples - 2026-10-26
+
+README Windows restart commands now use C:\path\to\resume-tailor with an explicit instruction to substitute the repository folder in both terminals. Original machine-specific names are absent from README; all three PowerShell blocks pass syntax parsing without execution. Documentation only; no product checks rerun, runtime/data/service/dependency changes, model calls, commits or publication. Prior CI fix/evidence and original blueprint remain preserved; all six session documents maintained and ending rules reread.

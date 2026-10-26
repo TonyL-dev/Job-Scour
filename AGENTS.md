@@ -219,3 +219,8 @@ Commit troubleshooting found a zero-byte .git/index.lock last modified October 2
 ## Cross-platform CI typing fix - 2026-10-26
 
 Windows-only subprocess constants must be resolved inside sys.platform statement guards recognized by mypy; conditional expressions alone do not narrow these APIs. check now type-checks both linux and win32 on every host. Preserve process-tree cancellation, no-window Windows launches and POSIX session isolation. Session validation is recorded in IMPLEMENTATION_STATUS.md; hosted CI requires its own rerun.
+
+
+## Generic README folder examples - 2026-10-26
+
+README Windows restart commands now use C:\path\to\resume-tailor with an explicit instruction to substitute the repository folder in both terminals. Original machine-specific names are absent from README; all three PowerShell blocks pass syntax parsing without execution. Documentation only; no product checks rerun, runtime/data/service/dependency changes, model calls, commits or publication. Prior CI fix/evidence and original blueprint remain preserved; all six session documents maintained and ending rules reread.

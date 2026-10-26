@@ -1775,3 +1775,8 @@ Commit troubleshooting found a zero-byte .git/index.lock last modified October 2
 ## Cross-platform CI typing fix - 2026-10-26
 
 User reported Ubuntu CI failing on three Windows-only CREATE_NO_WINDOW references. Reproduced the exact three errors locally using Linux-targeted mypy, added recognized statement guards in the Codex/import-parser modules and both-platform typing to the ordinary check runner. Original blueprint and prior environment/security limits are preserved. No API/dependency/personal-store/service/model/commit/remote/publication changes. Validation evidence is recorded in IMPLEMENTATION_STATUS.md.
+
+
+## Generic README folder examples - 2026-10-26
+
+README Windows restart commands now use C:\path\to\resume-tailor with an explicit instruction to substitute the repository folder in both terminals. Original machine-specific names are absent from README; all three PowerShell blocks pass syntax parsing without execution. Documentation only; no product checks rerun, runtime/data/service/dependency changes, model calls, commits or publication. Prior CI fix/evidence and original blueprint remain preserved; all six session documents maintained and ending rules reread.

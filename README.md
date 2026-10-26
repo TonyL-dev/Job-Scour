@@ -22,10 +22,10 @@ Use the native setup below for Codex generation with your existing ChatGPT login
 
 **For this existing installation, use the native app at http://127.0.0.1:5173.** Your saved master resume is in `backend/resume-tailor.db`. Docker uses a separate PostgreSQL database, even when launched from the same project folder; it does not automatically load or copy the native database. Starting Docker on port 5173 can therefore show an empty workspace while your native resume is still saved.
 
-After restarting Windows, open two PowerShell terminals. If Docker is serving this project on port 5173, first run `docker compose stop frontend backend` from the project folder. This frees the app ports and preserves its database volumes. Use the native commands below for your saved SQLite workspace; `docker compose up` starts the separate Docker workspace again. In the first, start the backend against the existing database:
+After restarting Windows, open two PowerShell terminals. If Docker is serving this project on port 5173, first run `docker compose stop frontend backend` from the project folder. This frees the app ports and preserves its database volumes. Use the native commands below for your saved SQLite workspace; `docker compose up` starts the separate Docker workspace again. Replace `C:\path\to\resume-tailor` in both commands with your repository folder. In the first, start the backend against the existing database:
 
 ```powershell
-Set-Location 'D:\DUM-E\Stonks V2'
+Set-Location 'C:\path\to\resume-tailor'
 if (-not (Test-Path -LiteralPath 'backend/resume-tailor.db' -PathType Leaf)) {
     throw 'Saved database not found. Check the project folder before starting.'
 }
@@ -42,7 +42,7 @@ python scripts/tasks.py backend
 In the second terminal, start the frontend with its API pointed at that backend:
 
 ```powershell
-Set-Location 'D:\DUM-E\Stonks V2'
+Set-Location 'C:\path\to\resume-tailor'
 $env:API_PROXY_TARGET = 'http://127.0.0.1:8000'
 pnpm --dir frontend dev --host 127.0.0.1 --port 5173 --strictPort
 ```

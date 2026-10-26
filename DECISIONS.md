@@ -290,3 +290,8 @@ Commit troubleshooting found a zero-byte .git/index.lock last modified October 2
 ## Cross-platform CI typing fix - 2026-10-26
 
 Fix the Ubuntu CI attr-defined errors with explicit sys.platform statement guards around Windows-only subprocess constants. Retain direct checked attribute access rather than suppressing errors or using dynamic fallback lookup. Run mypy with --platform linux and --platform win32 in the ordinary check task so Windows development catches this Linux-only type regression. No dependency or contract changes.
+
+
+## Generic README folder examples - 2026-10-26
+
+README Windows restart commands now use C:\path\to\resume-tailor with an explicit instruction to substitute the repository folder in both terminals. Original machine-specific names are absent from README; all three PowerShell blocks pass syntax parsing without execution. Documentation only; no product checks rerun, runtime/data/service/dependency changes, model calls, commits or publication. Prior CI fix/evidence and original blueprint remain preserved; all six session documents maintained and ending rules reread.
